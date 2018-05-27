@@ -1,0 +1,19 @@
+# Files to ignore
+
+*.suo
+*.tlog
+*.lastbuildstate
+*.obj
+*.idb
+*.pdb
+*.exe
+*.ilk
+*.ipch
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.opendb
+*.enc
+*.rar
+*.enc
