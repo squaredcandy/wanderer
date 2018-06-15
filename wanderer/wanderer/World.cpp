@@ -2,7 +2,7 @@
 
 namespace Wanderer::Engine::World
 {
-	int chunkSize		= 16;
+	int chunkSize		= 256;
 
 	int heightSeed		= 1337;
 

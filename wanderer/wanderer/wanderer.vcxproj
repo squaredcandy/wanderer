@@ -525,6 +525,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Module.h" />
+    <ClInclude Include="Reflection.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />

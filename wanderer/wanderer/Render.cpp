@@ -115,6 +115,8 @@ namespace Wanderer::Engine::Render
 						  0, 0, (GLint) size.x, (GLint) size.y,
 						  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, 
 						  GL_NEAREST);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 
 	void BindDepthToFrameBuffer(Buffer buffer, ImVec2& size, bool multisampled)
@@ -239,6 +241,7 @@ namespace Wanderer::Engine::Render
 		glUseProgram(0);
 
 		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			if (sampleSize != 1)
 			{
 				CopyMSAABufferToDrawBuffer(msaaBuffer.frame, 

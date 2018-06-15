@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <numeric>
 
 #include <ImGui/imgui.h>
 #include <GL/gl3w.h>

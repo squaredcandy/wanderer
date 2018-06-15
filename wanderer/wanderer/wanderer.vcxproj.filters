@@ -1295,6 +1295,9 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files\src\engine\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Reflection.h">
+      <Filter>Header Files\src\engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ext\glm\gtx\associated_min_max.inl">

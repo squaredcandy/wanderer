@@ -44,34 +44,34 @@ void main()
 
 	mat4 mvp = gs_in[0].MVP;
 	
-	vec3 pos1 = gs_in[0].Pos;
-	vec3 pos2 = gs_in[1].Pos;
-	vec3 pos3 = gs_in[2].Pos;
+	//vec3 pos1 = gs_in[0].Pos;
+	//vec3 pos2 = gs_in[1].Pos;
+	//vec3 pos3 = gs_in[2].Pos;
 	
-	//for(int i = 0; i < 3; ++i)
-	//{
-	//	gl_Position = mvp * vec4(gs_in[i].Pos, 1.0f);
-	//	TexCoords = gs_in[i].TexCoords;
-	//	EmitVertex();
-	//}
+	for(int i = 0; i < 3; ++i)
+	{
+		gl_Position = mvp * vec4(gs_in[i].Pos, 1.0f);
+		TexCoords = gs_in[i].TexCoords;
+		EmitVertex();
+	}
 
 	EndPrimitive();
-	float size = 0.625f;
-	vec3 triangle[] = {vec3(0,0,0), vec3(size,0,0), vec3(size,size,0)}; 
-
-	for(int k = 0; k < 1; ++k)
-	{
-		for(int i = 0; i < 16; ++i)
-		{
-			vec3 offset = vec3(i * size, k * size, 0);
-			for(int j = 0; j < 3; ++j)
-			{
-				gl_Position = mvp * vec4(pos1 - triangle[j] - offset, 1.0f);
-				TexCoords = gs_in[0].TexCoords;
-				EmitVertex();
-			}
-
-			EndPrimitive();
-		}
-	}
+//	float size = 0.625f;
+//	vec3 triangle[] = {vec3(0,0,0), vec3(size,0,0), vec3(size,size,0)}; 
+//
+//	for(int k = 0; k < 1; ++k)
+//	{
+//		for(int i = 0; i < 16; ++i)
+//		{
+//			vec3 offset = vec3(i * size, k * size, 0);
+//			for(int j = 0; j < 3; ++j)
+//			{
+//				gl_Position = mvp * vec4(pos1 - triangle[j] - offset, 1.0f);
+//				TexCoords = gs_in[0].TexCoords;
+//				EmitVertex();
+//			}
+//
+//			EndPrimitive();
+//		}
+//	}
 }
