@@ -4,17 +4,14 @@
 #include "Render.h"
 #include "Entities.h"
 #include "Shader.h"
+#include "World.h"
+#include "Camera.h"
 
 #include <vld.h>
-#include<iostream>
+#include <iostream>
 
-const BufferID	BUFFER_FRAME	= 00;
-const BufferID	BUFFER_MSAA		= 01;
-
-const MeshID	MESH_SPHERE		= 00;
-const MeshID	MESH_PLANE		= 01;
-
-const ShaderID	SHADER_LIGHT	= 00;
+const BufferID	BUFFER_FRAME = 00;
+const BufferID	BUFFER_MSAA = 01;
 
 namespace Wanderer::Game
 {
@@ -22,8 +19,10 @@ namespace Wanderer::Game
 
 	void Init()
 	{
-		Shaders::CreateShader(SHADER_LIGHT, "light");
+		// Shader
+		Shaders::CreateShader(SHADER_TERRAIN, "terrain", true, true, true);
 
+		// Render Buffers
 		Render::AddBuffer(BUFFER_FRAME);
 		Render::InitFrameBuffer(BUFFER_FRAME);
 		Render::InitColorBuffer(BUFFER_FRAME, GL_TEXTURE_2D);
@@ -37,11 +36,20 @@ namespace Wanderer::Game
 		Render::drawBufferID = BUFFER_FRAME;
 		Render::msaaBufferID = BUFFER_MSAA;
 
-		auto player = Entities::AddEntity("Gary");
-		Entities::playerID = player->GetID();
+		// World
+		World::RandomiseSeed();
+		World::GenerateWorld(CHUNK_LENGTH);
 
+		// Camera
+		Camera::AddCamera(CAMERA_PLAYER);
+
+		// Mesh
 		//Meshes::LoadModel(MESH_SPHERE, "sphere_export.fbx");
 		Meshes::LoadModel(MESH_PLANE, "plane_export.fbx");
+
+		// Entity
+		auto player = Entities::AddEntity("Gary");
+		Entities::playerID = player->GetID();
 	}
 }
 

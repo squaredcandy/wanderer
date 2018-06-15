@@ -166,32 +166,87 @@ namespace Wanderer::Engine::Render
 		auto pos = ImGui::GetWindowPos();
 		auto size = ImGui::GetWindowSize();
 
-		Buffer drawBuffer = buffers[drawBufferID];
-		Buffer msaaBuffer = buffers[msaaBufferID];
-		
-		BindTextureToFramebuffer(drawBuffer, size, GL_TEXTURE_2D);
-		BindDepthToFrameBuffer(drawBuffer, size, false);
-		if (sampleSize != 1)
+		if (ImGui::IsWindowFocused() && ImGui::IsMousePosValid())
 		{
-			BindTextureToFramebuffer(msaaBuffer, size, 
-									 GL_TEXTURE_2D_MULTISAMPLE);
-			BindDepthToFrameBuffer(msaaBuffer, size, true);
-			BeginFrameBufferDrawing(msaaBuffer.frame, size);
+			ImGui::SetKeyboardFocusHere();
+			float deltaTime = ImGui::GetIO().DeltaTime;
+			Camera::CameraTranslation(deltaTime);
+
+			if (ImGui::IsMouseDragging(1))
+			{
+				Camera::CameraRotation(deltaTime, size, pos);
+			}
+			if (ImGui::IsMouseReleased(1))
+			{
+				//SDL_ShowCursor(1);
+				ImGui::ResetMouseDragDelta(1);
+			}
 		}
 		else
 		{
-			BeginFrameBufferDrawing(drawBuffer.frame, size);
+			//SDL_ShowCursor(1);
+			ImGui::ResetMouseDragDelta(1);
 		}
-		
 
+		Buffer drawBuffer = buffers[drawBufferID];
+		Buffer msaaBuffer = buffers[msaaBufferID];
 
-		if (sampleSize != 1)
 		{
-			CopyMSAABufferToDrawBuffer(msaaBuffer.frame, 
-									   drawBuffer.frame, 
-									   size);
+			BindTextureToFramebuffer(drawBuffer, size, GL_TEXTURE_2D);
+			BindDepthToFrameBuffer(drawBuffer, size, false);
+			if (sampleSize != 1)
+			{
+				BindTextureToFramebuffer(msaaBuffer, size, 
+										 GL_TEXTURE_2D_MULTISAMPLE);
+				BindDepthToFrameBuffer(msaaBuffer, size, true);
+				BeginFrameBufferDrawing(msaaBuffer.frame, size);
+			}
+			else
+			{
+				BeginFrameBufferDrawing(drawBuffer.frame, size);
+			}
 		}
-		EndFrameBufferDrawing(drawBuffer.frame, size, pos);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		Camera::UpdateCameraVectors();
+
+		glm::mat4 projection, view, model;
+		projection = Camera::GetProjectionMatrix(size);
+		view = Camera::GetViewMatrix();
+		glCullFace(GL_BACK);
+
+		auto planeMesh = Meshes::GetModel(MESH_PLANE);
+		glBindVertexArray(planeMesh->VAO);
+		glDepthFunc(GL_LESS);
+
+		Shaders::SetCurrentShader(SHADER_TERRAIN);
+		Shaders::SetMat4("Projection", projection);
+		Shaders::SetMat4("View", view);
+		Shaders::SetInt("heightNoise", 0);
+		Shaders::SetFloat("tVal", Debug::debugData.tVal);
+
+		auto heightmap = Textures::GetMaterial(CHUNK_TERRAIN);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, heightmap->textures[Material::MAP_HEIGHT]->textureID);
+
+		model = glm::translate(glm::mat4(), glm::vec3(3,0,0));
+		model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
+		model = glm::scale(model, glm::vec3(1));
+		Shaders::SetMat4("Model", model);
+		glDrawArrays(GL_TRIANGLES, 0, (GLuint) planeMesh->indices.size());
+		
+		glUseProgram(0);
+
+		{
+			if (sampleSize != 1)
+			{
+				CopyMSAABufferToDrawBuffer(msaaBuffer.frame, 
+										   drawBuffer.frame, 
+										   size);
+			}
+			EndFrameBufferDrawing(drawBuffer.frame, size, pos);
+		}
 
 		ImGui::End();
 		ImGui::PopStyleVar();
