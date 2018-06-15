@@ -1,9 +1,25 @@
 #pragma once
 
+#include "Mesh.h"
 #include "Engine.h"
 #include "Flags.h"
 #include "Debug.h"
 #include "Font.h"
+#include "Shader.h"
+#include "Camera.h"
+#include "Texture.h"
+#include "World.h"
+
+const MeshID	MESH_SPHERE			= 00;
+const MeshID	MESH_PLANE			= 01;
+
+const ShaderID	SHADER_TERRAIN		= 00;
+
+const CameraID	CAMERA_PLAYER		= 00;
+
+const TextureID TEX_TERRAIN_HEIGHT	= 00;
+
+const int		CHUNK_LENGTH		= 1;
 
 struct Buffer
 {

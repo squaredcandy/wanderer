@@ -2,6 +2,8 @@
 
 namespace Wanderer::Engine::Debug
 {
+	DebugData debugData;
+
 	int renderTimeIdx = 0;
 	std::array<DebugArray, TIMER_LENGTH> debugTimers;
 
@@ -21,6 +23,14 @@ namespace Wanderer::Engine::Debug
 			*std::max_element(timer.begin(), timer.end()) + 1.f,
 			size
 		);
+	}
+
+	void DebugWindow()
+	{
+		ImGui::Checkbox("Wireframe", &debugData.wireframe);
+		if (debugData.wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		ImGui::SliderFloat("tVal", &debugData.tVal, 0.f, 1.f);
 	}
 
 }

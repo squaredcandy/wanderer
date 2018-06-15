@@ -11,6 +11,7 @@ namespace Wanderer::Game::Scene
 	void GameScene()
 	{
 		if (Engine::Flag::showDebugGraphWindow) UI::DebugGraphWindow();
+		if (Engine::Flag::showDebugWindow) UI::DebugWindow();
 	}
 
 	void tick()

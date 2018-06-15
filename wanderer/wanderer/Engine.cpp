@@ -37,6 +37,9 @@ namespace Wanderer::Engine
 
 	void GLSettings()
 	{
+		// Enable Face Culling
+		glEnable(GL_CULL_FACE);
+
 		// Enable alpha blending for textures
 		glEnable (GL_BLEND);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -197,7 +200,7 @@ namespace Wanderer::Engine
 	{
 		Shaders::Cleanup();
 		Render::Cleanup();
-		
+		Textures::Cleanup();
 		Meshes::Cleanup();
 		
 		FT_Done_Face(Font::fontFace);

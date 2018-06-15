@@ -148,4 +148,11 @@ namespace Wanderer::Engine::Meshes
 			glDeleteBuffers(1, &mesh.second.EBO);
 		}
 	}
+
+	Mesh * GetModel(MeshID key)
+	{
+		if (meshes.find(key) == meshes.end()) return nullptr;
+		return &meshes[key];
+	}
+
 }

@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entities.cpp" />
@@ -144,10 +145,13 @@
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="wanderer.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Entities.h" />
@@ -524,14 +528,17 @@
     <ClInclude Include="Render.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Meshes\cylinder_export.FBX" />
     <None Include="Data\Meshes\plane_export.FBX" />
     <None Include="Data\Meshes\sphere_export.FBX" />
-    <None Include="Data\Shaders\light.frag" />
-    <None Include="Data\Shaders\light.vert" />
+    <None Include="Data\Shaders\terrain.frag" />
+    <None Include="Data\Shaders\terrain.geom" />
+    <None Include="Data\Shaders\terrain.vert" />
     <None Include="ext\assimp\color4.inl" />
     <None Include="ext\assimp\material.inl" />
     <None Include="ext\assimp\matrix3x3.inl" />
@@ -654,6 +661,9 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="ProggyClean.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ext\ImGui\imgui.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

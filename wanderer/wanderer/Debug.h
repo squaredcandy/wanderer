@@ -6,6 +6,7 @@
 #include <string>
 
 #include <ImGui/imgui.h>
+#include <GL/gl3w.h>
 
 const int DEBUG_LENGTH = 100;
 const float NANO_TO_MILLI = 1000000.0f;
@@ -21,11 +22,20 @@ using NS_Time = std::chrono::nanoseconds;
 
 using DebugArray = std::array<float, DEBUG_LENGTH>;
 
+struct DebugData
+{
+	bool wireframe;
+	float tVal;
+};
+
 namespace Wanderer::Engine::Debug
 {
+	extern DebugData debugData;
+
 	extern int renderTimeIdx;
 	extern std::array<DebugArray, TIMER_LENGTH> debugTimers;
 
 	void UpdateTime(DebugArray& timer, HR_Clock::time_point startTime);
 	void DrawGraph(std::string name, DebugArray& timer, ImVec2 size = { 0, 80 });
+	void DebugWindow();
 }

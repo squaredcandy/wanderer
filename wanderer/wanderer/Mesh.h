@@ -31,6 +31,7 @@ using MeshID = unsigned int;
 
 namespace Wanderer::Engine::Meshes
 {
+	Mesh * GetModel(MeshID key);
 	void LoadModel(MeshID key, std::string path);
 	void Cleanup();
 }

@@ -97,6 +97,12 @@
     <Filter Include="Resource Files\data\fonts">
       <UniqueIdentifier>{76f7d4e9-948a-4c26-9088-71659d661e41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\src\engine\rendering">
+      <UniqueIdentifier>{f819526e-8d0e-41d5-9c33-7a5e73d1dcad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\src\engine\rendering">
+      <UniqueIdentifier>{2a36bd7c-5f1e-4eaf-95fa-6c2156bdb1f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ext\glm\detail\glm.cpp">
@@ -132,9 +138,6 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\src\game</Filter>
     </ClCompile>
-    <ClCompile Include="Render.cpp">
-      <Filter>Source Files\src\engine</Filter>
-    </ClCompile>
     <ClCompile Include="Flags.cpp">
       <Filter>Source Files\src\engine</Filter>
     </ClCompile>
@@ -144,17 +147,29 @@
     <ClCompile Include="UI.cpp">
       <Filter>Source Files\src\game</Filter>
     </ClCompile>
-    <ClCompile Include="Font.cpp">
-      <Filter>Source Files\src\engine</Filter>
-    </ClCompile>
     <ClCompile Include="Entities.cpp">
       <Filter>Source Files\src\engine</Filter>
     </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Source Files\src\engine\rendering</Filter>
+    </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\src\engine</Filter>
+      <Filter>Source Files\src\engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>Source Files\src\engine\rendering</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>Source Files\src\engine</Filter>
+      <Filter>Source Files\src\engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Source Files\src\engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\src\engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\src\engine\rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1247,9 +1262,6 @@
     <ClInclude Include="Mods.h">
       <Filter>Header Files\src\engine\entity\modules</Filter>
     </ClInclude>
-    <ClInclude Include="Render.h">
-      <Filter>Header Files\src\engine</Filter>
-    </ClInclude>
     <ClInclude Include="Flags.h">
       <Filter>Header Files\src\engine</Filter>
     </ClInclude>
@@ -1259,17 +1271,29 @@
     <ClInclude Include="UI.h">
       <Filter>Header Files\src\game</Filter>
     </ClInclude>
-    <ClInclude Include="Font.h">
-      <Filter>Header Files\src\engine</Filter>
-    </ClInclude>
     <ClInclude Include="Entities.h">
       <Filter>Header Files\src\engine</Filter>
     </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Header Files\src\engine\rendering</Filter>
+    </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>Header Files\src\engine</Filter>
+      <Filter>Header Files\src\engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>Header Files\src\engine\rendering</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>Header Files\src\engine</Filter>
+      <Filter>Header Files\src\engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>Header Files\src\engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\src\engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\src\engine\rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1639,10 +1663,13 @@
     <None Include="Data\Meshes\sphere_export.FBX">
       <Filter>Resource Files\data\meshes</Filter>
     </None>
-    <None Include="Data\Shaders\light.frag">
+    <None Include="Data\Shaders\terrain.frag">
       <Filter>Resource Files\data\shaders</Filter>
     </None>
-    <None Include="Data\Shaders\light.vert">
+    <None Include="Data\Shaders\terrain.geom">
+      <Filter>Resource Files\data\shaders</Filter>
+    </None>
+    <None Include="Data\Shaders\terrain.vert">
       <Filter>Resource Files\data\shaders</Filter>
     </None>
   </ItemGroup>
@@ -1650,5 +1677,8 @@
     <Font Include="ProggyClean.ttf">
       <Filter>Resource Files\data\fonts</Filter>
     </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ext\ImGui\imgui.natvis" />
   </ItemGroup>
 </Project>

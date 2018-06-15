@@ -30,6 +30,11 @@ namespace Wanderer::Engine::Shaders
 	void Cleanup();
 }
 
+namespace Wanderer::Engine::Textures
+{
+	void Cleanup();
+}
+
 struct ModelInstance
 {
 
