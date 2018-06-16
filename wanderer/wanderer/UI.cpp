@@ -11,6 +11,7 @@ namespace Wanderer::Game::UI
 		Engine::Debug::DrawGraph("Render Graph", Engine::Debug::debugTimers[TIMER_GRAPHICS]);
 		Engine::Debug::DrawGraph("UI Graph", Engine::Debug::debugTimers[TIMER_UI]);
 		Engine::Debug::DrawGraph("Update Graph", Engine::Debug::debugTimers[TIMER_UPDATE]);
+		Engine::Debug::DrawGraph("Total Graph", Engine::Debug::debugTimers[TIMER_TOTAL]);
 
 		ImGui::End();
 		ImGui::PopStyleVar();

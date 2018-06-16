@@ -1,51 +1,34 @@
 #pragma once
 
+#include <any>
+#include <string>
+#include <map>
+#include <typeindex>
+#include <functional>
+
+#include <ImGui/imgui.h>
+
+#include "ModTransform.h"
+
+#define REFLECTARGS std::string name, std::string typeName, std::any var
+
+using ReflectFunction = std::function<void(std::string, std::string, std::any)>;
 
 namespace Wanderer::Engine::Reflection
 {
-	template<typename T> std::string ReflectHandleNumber(const char * name, 
-		std::string& format, T var)
-	{
-		char ret[50];
-		sprintf_s(ret, format.c_str(), name, var);
-		return std::string{ ret };
-	}
+	extern ImVec4 varColor;
+	extern std::unordered_map<std::type_index, ReflectFunction> reflectMap;
+	extern std::unordered_map<std::type_index, ReflectFunction> reflectEditMap;
+	
+	void inline FormatName(std::string& name);
+	void inline FormatType(std::string& type);
 
-	template<typename T> std::string ReflectHandleString(const char * name,
-		std::string& format, T var)
-	{
-		char ret[50];
-		sprintf_s(ret, format.c_str(), name, var);
-		return std::string{ ret };
-	}
+	void ReflectEdit(std::string name, std::any var);
+	void Reflect(std::string name, std::any var);
 
-	template<typename T> std::string Reflect(const char * name, T var)
-	{
-		std::string format{ "%s: " };
-
-		// Floating Point Numbers
-		if (typeid(T) == typeid(float) || typeid(T) == typeid(double))
-		{
-			format.append("%.3f");
-			return ReflectHandleNumber(name, format, var);
-		}
-		// Whole Numbers
-		else if (typeid(T) == typeid(int) || typeid(T) == typeid(unsigned int))
-		{
-			format.append("%d");
-			return ReflectHandleNumber(name, format, var);
-		}
-		// Strings
-		else if (typeid(T) == typeid(const char *))
-		{
-			format.append("%s");
-			return ReflectHandleString(name, format, var);
-		}
-		
-
-		return std::string{ "" };
-	}
-
+	void AddReflect(bool editable, std::type_index index, ReflectFunction value);
+	void AddDefaultReflects();
 }
 
-#define GETVARVALUE(A) Wanderer::Engine::Reflection::Reflect(#A, A)
+#define EDITVALUE(A)	Wanderer::Engine::Reflection::ReflectEdit(std::string{#A}, std::any(&A))
+#define PRINTVALUE(A)	Wanderer::Engine::Reflection::Reflect(std::string{#A}, std::any(A))

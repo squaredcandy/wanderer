@@ -143,6 +143,7 @@ namespace Wanderer::Engine
 		bool done = false;
 		while (!done)
 		{
+			auto totalTimer = HR_Clock::now();
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
@@ -155,23 +156,26 @@ namespace Wanderer::Engine
 
 			auto startTimer = HR_Clock::now();
 			if(doTick) tickFunction();
-			Debug::UpdateTime(Debug::debugTimers[TIMER_UPDATE], startTimer);
+			Debug::UpdateTime(TIMER_UPDATE, startTimer);
 			
 			
 			startTimer = HR_Clock::now();
 			sceneFunction();
-			Debug::UpdateTime(Debug::debugTimers[TIMER_UI], startTimer);
+			Debug::UpdateTime(TIMER_UI, startTimer);
 
 
 			startTimer = HR_Clock::now();
 			Render::RenderWorld();
-			Debug::UpdateTime(Debug::debugTimers[TIMER_GRAPHICS], startTimer);
-
-
-			Debug::renderTimeIdx = (Debug::renderTimeIdx + 1) % DEBUG_LENGTH;
+			Debug::UpdateTime(TIMER_GRAPHICS, startTimer);
 
 			ClearWindow();
-			DrawWindow();
+			ImGui::Render();
+			ImGui_ImplSdlGL3_RenderDrawData(ImGui::GetDrawData());
+			Debug::UpdateTime(TIMER_TOTAL, totalTimer);
+			SDL_GL_SwapWindow(window);
+			//DrawWindow();
+
+			Debug::renderTimeIdx = (Debug::renderTimeIdx + 1) % DEBUG_LENGTH;
 		}
 	}
 

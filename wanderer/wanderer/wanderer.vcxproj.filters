@@ -171,6 +171,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\src\engine\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="Reflection.cpp">
+      <Filter>Source Files\src\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ext\glm\detail\_features.hpp">

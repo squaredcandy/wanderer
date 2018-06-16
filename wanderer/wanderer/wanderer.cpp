@@ -6,7 +6,7 @@
 #include "Shader.h"
 #include "World.h"
 #include "Camera.h"
-#include "Reflection.h"
+//#include "Reflection.h"
 
 #include <vld.h>
 #include <iostream>
@@ -20,16 +20,8 @@ namespace Wanderer::Game
 
 	void Init()
 	{
-		std::string randomstring = "3";
-		auto b = GETVARVALUE(randomstring.c_str());
-		int randomint = 43;
-		printf("%s\n", b.c_str());
-		for (int i = 0; i < 10; ++i)
-		{
-			++randomint;
-			auto a = GETVARVALUE(randomint);
+		Reflection::AddDefaultReflects();
 
-		}
 		// Shader
 		Shaders::CreateShader(SHADER_TERRAIN, "terrain", true, true, true);
 
