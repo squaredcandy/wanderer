@@ -536,11 +536,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Meshes\cylinder_export.FBX" />
+    <None Include="Data\Meshes\plane_big_export.FBX" />
     <None Include="Data\Meshes\plane_export.FBX" />
     <None Include="Data\Meshes\sphere_export.FBX" />
     <None Include="Data\Shaders\terrain.frag" />
     <None Include="Data\Shaders\terrain.geom" />
     <None Include="Data\Shaders\terrain.vert" />
+    <None Include="Data\Shaders\tess.tese" />
+    <None Include="Data\Shaders\tess.frag" />
+    <None Include="Data\Shaders\tess.tesc" />
+    <None Include="Data\Shaders\tess.vert" />
     <None Include="ext\assimp\color4.inl" />
     <None Include="ext\assimp\material.inl" />
     <None Include="ext\assimp\matrix3x3.inl" />
@@ -660,6 +665,7 @@
     <None Include="ext\glm\gtx\vector_angle.inl" />
     <None Include="ext\glm\gtx\vector_query.inl" />
     <None Include="ext\glm\gtx\wrap.inl" />
+    <None Include="Data\Shaders\tess.geom" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="ProggyClean.ttf" />

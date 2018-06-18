@@ -86,6 +86,11 @@ namespace Wanderer::Engine::Camera
 		cam.upVector = glm::normalize(glm::cross(cam.rightVector, cam.forwardVector));
 	}
 
+	glm::vec3& GetCameraPosition()
+	{
+		return cameras[currentCamera].translation;
+	}
+
 	glm::vec3 GetFaceCameraVector()
 	{
 		return glm::vec3(0, cameras[currentCamera].rotation.x + 90.f, 0);

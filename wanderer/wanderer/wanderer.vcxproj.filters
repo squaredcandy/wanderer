@@ -1678,6 +1678,24 @@
     <None Include="Data\Shaders\terrain.vert">
       <Filter>Resource Files\data\shaders</Filter>
     </None>
+    <None Include="Data\Shaders\tess.frag">
+      <Filter>Resource Files\data\shaders</Filter>
+    </None>
+    <None Include="Data\Shaders\tess.tesc">
+      <Filter>Resource Files\data\shaders</Filter>
+    </None>
+    <None Include="Data\Shaders\tess.vert">
+      <Filter>Resource Files\data\shaders</Filter>
+    </None>
+    <None Include="Data\Shaders\tess.tese">
+      <Filter>Resource Files\data\shaders</Filter>
+    </None>
+    <None Include="Data\Shaders\tess.geom">
+      <Filter>Resource Files\data\shaders</Filter>
+    </None>
+    <None Include="Data\Meshes\plane_big_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="ProggyClean.ttf">

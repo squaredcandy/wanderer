@@ -158,6 +158,16 @@ namespace Wanderer::Engine::Shaders
 		currentShader = key;
 	}
 
+	std::vector<GLchar> GetProgramError(ShaderID key)
+	{
+		GLint maxLength = 0;
+		glGetProgramiv(shaders[key].id, GL_INFO_LOG_LENGTH, &maxLength);
+		std::vector<GLchar> infoLog(maxLength);
+		if(maxLength > 0) 
+			glGetProgramInfoLog(shaders[key].id, maxLength, &maxLength, &infoLog[0]);
+		return infoLog;
+	}
+
 	inline GLint GetUniformLocation(const std::string& name)
 	{
 		return glGetUniformLocation(shaders[currentShader].id, name.c_str());
@@ -168,7 +178,7 @@ namespace Wanderer::Engine::Shaders
 		glUniform1i(GetUniformLocation(name), (int) value);
 	}
 
-	void SetInt(const std::string & name, int value) 
+	void SetInt(const std::string &name, int value) 
 	{
 		glUniform1i(GetUniformLocation(name), value);
 	}
@@ -176,6 +186,11 @@ namespace Wanderer::Engine::Shaders
 	void SetFloat(const std::string &name, float value) 
 	{
 		glUniform1f(GetUniformLocation(name), value);
+	}
+
+	void SetFloat(const std::string &name, float * value, int len)
+	{
+		glUniform1fv(GetUniformLocation(name), len, value);
 	}
 
 	void SetVec2(const std::string &name, const glm::vec2 &value) 

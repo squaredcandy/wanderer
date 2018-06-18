@@ -57,6 +57,7 @@ namespace Wanderer::Engine::Camera
 	void CameraTranslation(float deltaTime);
 	void CameraRotation(float deltaTime, ImVec2& size, ImVec2& pos);
 	void UpdateCameraVectors();
+	glm::vec3& GetCameraPosition();
 	glm::vec3 GetFaceCameraVector();
 	glm::mat4 GetProjectionMatrix(ImVec2& size);
 	glm::mat4 GetViewMatrix();

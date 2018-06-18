@@ -62,7 +62,8 @@ namespace Wanderer::Engine
 		glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, 
 							  GL_DONT_CARE, 0, nullptr, false);
 		// 	glCullFace(GL_BACK);
-		// 	glFrontFace(GL_CCW);
+		glFrontFace(GL_CCW);
+		//glPatchParameteri(GL_PATCH_VERTICES, 3);
 	}
 
 	void InitializeEngine()

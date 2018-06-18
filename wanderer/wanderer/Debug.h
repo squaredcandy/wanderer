@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Reflection.h"
+#include "Texture.h"
 
 #include <chrono>
 #include <array>
@@ -29,10 +30,24 @@ using DebugArray = std::array<float, DEBUG_LENGTH>;
 struct DebugData
 {
 	bool wireframe;
-	float tVal;
+	bool drawArrays;
+	
+	float tessInnerLevel;
+	float tessOuterLevel;
+	
+	float heightFactor;
+	
+	std::array<float, 5> lodDist;
+	std::array<float, 5> tesLevel;
 
 	DebugData()
 	{
+		tessInnerLevel = 1;
+		tessOuterLevel = 1;
+		heightFactor = 1;
+
+		lodDist = { 2, 6, 10, 50, 100 };
+		tesLevel = { 15, 10, 6, 2, 1 };
 	}
 
 	~DebugData() = default;

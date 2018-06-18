@@ -208,7 +208,6 @@ namespace Wanderer::Engine::Render
 				BeginFrameBufferDrawing(drawBuffer.frame, size);
 			}
 		}
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		Camera::UpdateCameraVectors();
 
@@ -221,11 +220,19 @@ namespace Wanderer::Engine::Render
 		glBindVertexArray(planeMesh->VAO);
 		glDepthFunc(GL_LESS);
 
-		Shaders::SetCurrentShader(SHADER_TERRAIN);
+		//const GLuint currentShader = SHADER_TERRAIN;
+		const GLuint currentShader = SHADER_TESS;
+
+		Shaders::SetCurrentShader(currentShader);
 		Shaders::SetMat4("Projection", projection);
 		Shaders::SetMat4("View", view);
 		Shaders::SetInt("heightNoise", 0);
-		Shaders::SetFloat("tVal", Debug::debugData.tVal);
+		Shaders::SetVec3("Wld_Eye_Pos", Camera::GetCameraPosition());
+		Shaders::SetFloat("heightFactor", Debug::debugData.heightFactor);
+		Shaders::SetFloat("lodDistance", Debug::debugData.lodDist.data(), 5);
+		Shaders::SetFloat("tesLevels", Debug::debugData.tesLevel.data(), 5);
+		//Shaders::SetFloat("TessLevelInner", Debug::debugData.tessInnerLevel);
+		//Shaders::SetFloat("TessLevelOuter", Debug::debugData.tessOuterLevel);
 
 		auto heightmap = Textures::GetMaterial(CHUNK_TERRAIN);
 
@@ -234,10 +241,25 @@ namespace Wanderer::Engine::Render
 
 		model = glm::translate(glm::mat4(), glm::vec3(3,0,0));
 		model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
-		model = glm::scale(model, glm::vec3(1));
+		model = glm::scale(model, glm::vec3(10));
 		Shaders::SetMat4("Model", model);
-		glDrawArrays(GL_TRIANGLES, 0, (GLuint) planeMesh->indices.size());
-		
+
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
+		const GLuint drawType = GL_PATCHES;
+		if (Debug::debugData.drawArrays)
+		{
+			glDrawArrays(drawType, 0, (GLuint) planeMesh->indices.size());
+		}
+		else
+		{
+			glDrawElements(drawType, (GLuint)planeMesh->indices.size(), 
+						   GL_UNSIGNED_INT, nullptr);
+		}
+
+		auto log = Shaders::GetProgramError(currentShader);
+		if(!log.empty())
+			std::cout << "Log: " << log.data() << std::endl;
+
 		glUseProgram(0);
 
 		{

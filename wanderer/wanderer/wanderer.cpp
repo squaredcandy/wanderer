@@ -24,6 +24,7 @@ namespace Wanderer::Game
 
 		// Shader
 		Shaders::CreateShader(SHADER_TERRAIN, "terrain", true, true, true);
+		Shaders::CreateShader(SHADER_TESS, "tess", true, true, false, true);
 
 		// Render Buffers
 		Render::AddBuffer(BUFFER_FRAME);
@@ -48,7 +49,9 @@ namespace Wanderer::Game
 
 		// Mesh
 		//Meshes::LoadModel(MESH_SPHERE, "sphere_export.fbx");
-		Meshes::LoadModel(MESH_PLANE, "plane_export.fbx");
+		//Meshes::LoadModel(MESH_CYLINDER, "cylinder_export.fbx");
+		//Meshes::LoadModel(MESH_PLANE, "plane_export.fbx");
+		Meshes::LoadModel(MESH_PLANE, "plane_big_export.fbx");
 
 		// Entity
 		auto player = Entities::AddEntity("Gary");

@@ -4,6 +4,7 @@
 
 #include <map>
 #include <array>
+#include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -32,10 +33,12 @@ namespace Wanderer::Engine::Shaders
 	void Cleanup();
 
 	void SetCurrentShader(ShaderID key);
+	std::vector<GLchar> GetProgramError(ShaderID key);
 
 	void SetBool(const std::string &name, bool value);
 	void SetInt(const std::string &name, int value);
 	void SetFloat(const std::string &name, float value);
+	void SetFloat(const std::string &name, float * value, int len);
 	void SetVec2(const std::string &name, const glm::vec2 &value);
 	void SetVec2(const std::string &name, float x, float y);
 	void SetVec3(const std::string &name, const glm::vec3 &value);

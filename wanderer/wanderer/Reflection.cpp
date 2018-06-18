@@ -223,24 +223,30 @@ namespace Wanderer::Engine::Reflection
 		);
 	}
 
-	void ReflectEdit(std::string name, std::any var)
+	void ReflectEdit(std::string name, std::any var, bool optimization)
 	{
 		std::string type{ var.type().name() };
 		// Remove the x64 from the type
 #if _WIN64 || __x86_64__ || __ppc64__
 		type = type.substr(0, type.size() - 9);
 #endif
-		FormatName(name);
+		if(optimization) FormatName(name);
 		//FormatType(type);
-		reflectEditMap[var.type()](name, type, var);
+		if (reflectEditMap.find(var.type()) != reflectEditMap.end())
+		{
+			reflectEditMap[var.type()](name, type, var);
+		}
 	}
 
-	void Reflect(std::string name, std::any var)
+	void Reflect(std::string name, std::any var, bool optimization)
 	{
 		std::string type{ var.type().name() };
-		FormatName(name);
+		if (optimization) FormatName(name);
 		//FormatType(type);
-		reflectMap[var.type()](name, type, var);
+		if (reflectMap.find(var.type()) != reflectMap.end())
+		{
+			reflectMap[var.type()](name, type, var);
+		}
 	}
 
 	void AddReflect(bool editable, std::type_index index, 

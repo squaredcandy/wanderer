@@ -123,9 +123,9 @@ namespace Wanderer::Engine::Meshes
 	{
 		Assimp::Importer importer;
 		path.insert(0, "Data/Meshes/");
-		const aiScene * scene = importer.ReadFile(path, 
-												  aiProcess_Triangulate | 
-												  aiProcess_FlipUVs | 
+		const aiScene * scene = importer.ReadFile(path,
+												  aiProcess_Triangulate |
+												  aiProcess_FlipUVs |
 												  aiProcess_CalcTangentSpace |
 												  aiProcess_OptimizeMeshes);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || 
