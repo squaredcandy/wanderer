@@ -2,6 +2,7 @@
 
 #include "Reflection.h"
 #include "Texture.h"
+#include "Camera.h"
 
 #include <chrono>
 #include <array>
@@ -12,6 +13,7 @@
 #include <ImGui/imgui.h>
 #include <GL/gl3w.h>
 
+const int LOD_LENGTH = 5;
 const int DEBUG_LENGTH = 100;
 const float NANO_TO_MILLI = 1000000.0f;
 
@@ -32,26 +34,48 @@ struct DebugData
 	bool wireframe;
 	bool drawArrays;
 	
-	float tessInnerLevel;
-	float tessOuterLevel;
-	
 	float heightFactor;
 	
-	std::array<float, 5> lodDist;
-	std::array<float, 5> tesLevel;
+	std::array<float, LOD_LENGTH> lodDist;
+	std::array<float, LOD_LENGTH> tesLevel;
+
+	struct DirectionalLight
+	{
+		glm::vec3 ambient;
+		float aIntensity;
+
+		glm::vec3 direction;
+		float dIntensity;
+	};
+
+	DirectionalLight dLight;
 
 	DebugData()
 	{
-		tessInnerLevel = 1;
-		tessOuterLevel = 1;
-		heightFactor = 1;
+		heightFactor = 20;
+		
+		dLight.ambient = { 1.0f, 0.9f, 0.9f };
+		dLight.aIntensity = 1.f;
 
-		lodDist = { 2, 6, 10, 50, 100 };
-		tesLevel = { 15, 10, 6, 2, 1 };
+		dLight.direction = { 0, 1, 0 };
+		dLight.dIntensity = 1.f;
+
+		lodDist = { 50, 100, 500, 1000, 10000 };
+		tesLevel = { 30, 20, 12, 4, 2 };
 	}
 
 	~DebugData() = default;
 };
+
+namespace Wanderer::Engine::World
+{
+	extern float terrainScale;
+	extern int heightSeed;
+	extern int chunkSize;
+
+	void RandomiseSeed();
+	void GenerateWorld(int numOfChunks);
+}
 
 namespace Wanderer::Engine::Debug
 {

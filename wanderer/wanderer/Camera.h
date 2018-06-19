@@ -39,7 +39,6 @@ struct CameraData
 
 		translation = glm::vec3(-5, 5, 0);
 		worldUpVector = glm::vec3(0.f, 1.f, 0.f);
-		//eyeOffset = glm::vec3(0.f, 8.f, 0.f);
 		rotation[1] = -45.f;
 	}
 
@@ -57,6 +56,7 @@ namespace Wanderer::Engine::Camera
 	void CameraTranslation(float deltaTime);
 	void CameraRotation(float deltaTime, ImVec2& size, ImVec2& pos);
 	void UpdateCameraVectors();
+	CameraData& GetCamera(CameraID key = currentCamera);
 	glm::vec3& GetCameraPosition();
 	glm::vec3 GetFaceCameraVector();
 	glm::mat4 GetProjectionMatrix(ImVec2& size);

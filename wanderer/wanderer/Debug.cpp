@@ -44,17 +44,52 @@ namespace Wanderer::Engine::Debug
 
 		ImGui::Text("Frame Time: %.3f ms", frameTime);
 		ImGui::Text("Frame Rate: %.3f fps", frameRate);
-		ImGui::Separator();
+		if (ImGui::CollapsingHeader("Camera"))
+		{
+			auto& camData = Camera::GetCamera();
+			EDITVALUEN(camData.translateSpeed, "Translation Speed");
+		}
+		if (ImGui::CollapsingHeader("Light"))
+		{
+			ImGui::ColorEdit3("Ambient Light", &debugData.dLight.ambient.x);
+			ImGui::SliderFloat("Ambient Intensity", &debugData.dLight.aIntensity, 0.f, 1.f);
 
-		// Show Heightmap
-		auto heightmap = Textures::GetMaterial(0);
-		ImGui::Image((void*)heightmap->textures[Material::MAP_HEIGHT]->textureID, { 128, 128 });
-		ImGui::Separator();
+			ImGui::DragFloat3("Diffuse Direction", &debugData.dLight.direction.x);
+			ImGui::SliderFloat("Diffuse Intensity", &debugData.dLight.dIntensity, 0.f, 1.f);
+		}
+		if (ImGui::CollapsingHeader("Terrain"))
+		{
+			EDITVALUEN(World::terrainScale, "Terrain Scale");
 
-		EDITVALUEN(debugData.wireframe, "Wireframe");
-		EDITVALUEN(debugData.drawArrays, "Draw Arrays");
-		//EDITVALUEN(debugData.tessInnerLevel, "Tess Inner Level");
-		//EDITVALUEN(debugData.tessOuterLevel, "Tess Outer Level");
-		EDITVALUEN(debugData.heightFactor, "Height Factor");
+			ImGui::PushItemWidth(200);
+			ImGui::InputInt("Height Seed", &World::heightSeed);
+			ImGui::PopItemWidth();
+			ImGui::SameLine();
+			if (ImGui::Button("Randomise"))
+			{
+				World::RandomiseSeed();
+			}
+			ImGui::PushItemWidth(200);
+			ImGui::InputInt("Chunk Size", &World::chunkSize, World::chunkSize, World::chunkSize);
+			ImGui::PopItemWidth();
+
+			if (ImGui::Button("Regenerate World"))
+			{
+				World::GenerateWorld(1);
+			}
+			if (ImGui::TreeNode("Height Map"))
+			{
+				// Show Heightmap
+				auto heightmap = Textures::GetMaterial(0);
+				ImGui::Image((void*)heightmap->textures[Material::MAP_HEIGHT]->textureID, 
+							 { 128, 128 });
+				ImGui::TreePop();
+			}
+			ImGui::Separator();
+
+			EDITVALUEN(debugData.wireframe, "Wireframe");
+			EDITVALUEN(debugData.drawArrays, "Draw Arrays");
+			EDITVALUEN(debugData.heightFactor, "Height Factor");
+		}
 	}
 }

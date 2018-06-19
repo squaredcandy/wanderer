@@ -2,6 +2,8 @@
 
 namespace Wanderer::Engine::World
 {
+	float terrainScale	= 100;
+
 	int chunkSize		= 256;
 
 	int heightSeed		= 1337;

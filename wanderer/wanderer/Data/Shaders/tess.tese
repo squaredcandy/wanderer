@@ -33,6 +33,8 @@ void main()
 	Tex_Tese_Out = interpolate2D(Tex_Tesc_Out[0], Tex_Tesc_Out[1], Tex_Tesc_Out[2]);
 
 	float displacement = texture(heightNoise, Tex_Tese_Out).x;
+	
 	Pos_Tese_Out += Nor_Tese_Out * displacement * heightFactor;
+	
 	gl_Position = Projection * View * vec4(Pos_Tese_Out, 1.0);
 }

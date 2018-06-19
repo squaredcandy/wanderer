@@ -2,7 +2,7 @@
 
 namespace Wanderer::Engine::Render
 {
-	GLuint sampleSize = 1;
+	GLuint sampleSize = 4;
 
 	std::map<BufferID, Buffer> buffers;
 
@@ -226,13 +226,23 @@ namespace Wanderer::Engine::Render
 		Shaders::SetCurrentShader(currentShader);
 		Shaders::SetMat4("Projection", projection);
 		Shaders::SetMat4("View", view);
+
+		{
+			using namespace Debug;
+			Shaders::SetVec3("Wld_Eye_Pos", Camera::GetCameraPosition());
+			Shaders::SetFloat("heightFactor", debugData.heightFactor);
+			Shaders::SetFloat("lodDistance", debugData.lodDist.data(), LOD_LENGTH);
+			Shaders::SetFloat("tesLevels", debugData.tesLevel.data(), LOD_LENGTH);
+
+			Shaders::SetVec3("dLight.ambient", debugData.dLight.ambient);
+			Shaders::SetFloat("dLight.aIntensity", debugData.dLight.aIntensity);
+			
+			Shaders::SetVec3("dLight.direction", 
+							 glm::normalize(debugData.dLight.direction));
+			Shaders::SetFloat("dLight.dIntensity", debugData.dLight.dIntensity);
+		}
+
 		Shaders::SetInt("heightNoise", 0);
-		Shaders::SetVec3("Wld_Eye_Pos", Camera::GetCameraPosition());
-		Shaders::SetFloat("heightFactor", Debug::debugData.heightFactor);
-		Shaders::SetFloat("lodDistance", Debug::debugData.lodDist.data(), 5);
-		Shaders::SetFloat("tesLevels", Debug::debugData.tesLevel.data(), 5);
-		//Shaders::SetFloat("TessLevelInner", Debug::debugData.tessInnerLevel);
-		//Shaders::SetFloat("TessLevelOuter", Debug::debugData.tessOuterLevel);
 
 		auto heightmap = Textures::GetMaterial(CHUNK_TERRAIN);
 
@@ -241,7 +251,7 @@ namespace Wanderer::Engine::Render
 
 		model = glm::translate(glm::mat4(), glm::vec3(3,0,0));
 		model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
-		model = glm::scale(model, glm::vec3(10));
+		model = glm::scale(model, glm::vec3(World::terrainScale));
 		Shaders::SetMat4("Model", model);
 
 		glPatchParameteri(GL_PATCH_VERTICES, 3);
@@ -276,6 +286,4 @@ namespace Wanderer::Engine::Render
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
-
-
 }

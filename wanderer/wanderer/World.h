@@ -22,6 +22,8 @@ struct Chunk
 
 namespace Wanderer::Engine::World
 {
+	extern float terrainScale;
+
 	extern int chunkSize;
 
 	extern int heightSeed;

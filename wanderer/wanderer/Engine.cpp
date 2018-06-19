@@ -99,7 +99,7 @@ namespace Wanderer::Engine
 		window = SDL_CreateWindow("Wanderer",
 								  SDL_WINDOWPOS_CENTERED,
 								  SDL_WINDOWPOS_CENTERED,
-								  1280, 720,
+								  1600, 900,
 								  SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 		context = SDL_GL_CreateContext(window);
 		SDL_GL_SetSwapInterval(1); // Enable vsync
