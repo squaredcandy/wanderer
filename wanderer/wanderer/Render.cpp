@@ -220,8 +220,7 @@ namespace Wanderer::Engine::Render
 		glBindVertexArray(planeMesh->VAO);
 		glDepthFunc(GL_LESS);
 
-		//const GLuint currentShader = SHADER_TERRAIN;
-		const GLuint currentShader = SHADER_TESS;
+		GLuint currentShader = SHADER_TESS;
 
 		Shaders::SetCurrentShader(currentShader);
 		Shaders::SetMat4("Projection", projection);
@@ -236,10 +235,14 @@ namespace Wanderer::Engine::Render
 
 			Shaders::SetVec3("dLight.ambient", debugData.dLight.ambient);
 			Shaders::SetFloat("dLight.aIntensity", debugData.dLight.aIntensity);
-			
+
 			Shaders::SetVec3("dLight.direction", 
 							 glm::normalize(debugData.dLight.direction));
 			Shaders::SetFloat("dLight.dIntensity", debugData.dLight.dIntensity);
+
+			Shaders::SetInt("chunkSize", World::chunkSize);
+			Shaders::SetBool("drawGridLines", World::drawGridLines);
+			Shaders::SetFloat("gridLineWidth", World::gridLineWidth);
 		}
 
 		Shaders::SetInt("heightNoise", 0);
@@ -255,7 +258,7 @@ namespace Wanderer::Engine::Render
 		Shaders::SetMat4("Model", model);
 
 		glPatchParameteri(GL_PATCH_VERTICES, 3);
-		const GLuint drawType = GL_PATCHES;
+		GLuint drawType = GL_PATCHES;
 		if (Debug::debugData.drawArrays)
 		{
 			glDrawArrays(drawType, 0, (GLuint) planeMesh->indices.size());
@@ -269,6 +272,40 @@ namespace Wanderer::Engine::Render
 		auto log = Shaders::GetProgramError(currentShader);
 		if(!log.empty())
 			std::cout << "Log: " << log.data() << std::endl;
+
+		glUseProgram(0);
+
+		currentShader = SHADER_TERRAIN;
+
+		Shaders::SetCurrentShader(currentShader);
+		Shaders::SetMat4("Projection", projection);
+		Shaders::SetMat4("View", view);
+
+		{
+			using namespace Debug;
+			Shaders::SetVec3("Wld_Eye_Pos", Camera::GetCameraPosition());
+			Shaders::SetFloat("heightFactor", debugData.heightFactor);
+			Shaders::SetFloat("lodDistance", debugData.lodDist.data(), LOD_LENGTH);
+			Shaders::SetFloat("tesLevels", debugData.tesLevel.data(), LOD_LENGTH);
+		}
+
+		Shaders::SetInt("heightNoise", 0);
+
+		model = glm::translate(glm::mat4(), glm::vec3(3, 0, 0));
+		model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
+		model = glm::scale(model, glm::vec3(World::terrainScale));
+		Shaders::SetMat4("Model", model);
+
+		//drawType = GL_PATCHES;
+		if (Debug::debugData.drawArrays)
+		{
+			glDrawArrays(drawType, 0, (GLuint)planeMesh->indices.size());
+		}
+		else
+		{
+			glDrawElements(drawType, (GLuint)planeMesh->indices.size(),
+				GL_UNSIGNED_INT, nullptr);
+		}
 
 		glUseProgram(0);
 

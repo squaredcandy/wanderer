@@ -1696,6 +1696,8 @@
     <None Include="Data\Meshes\plane_big_export.FBX">
       <Filter>Resource Files\data\meshes</Filter>
     </None>
+    <None Include="Data\Shaders\terrain.tesc" />
+    <None Include="Data\Shaders\terrain.tese" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="ProggyClean.ttf">

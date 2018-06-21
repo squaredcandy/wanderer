@@ -23,7 +23,7 @@ namespace Wanderer::Game
 		Reflection::AddDefaultReflects();
 
 		// Shader
-		Shaders::CreateShader(SHADER_TERRAIN, "terrain", true, true, true);
+		Shaders::CreateShader(SHADER_TERRAIN, "terrain", true, true, true, true);
 		Shaders::CreateShader(SHADER_TESS, "tess", true, true, false, true);
 
 		// Render Buffers

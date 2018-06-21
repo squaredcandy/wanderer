@@ -22,6 +22,9 @@ struct Chunk
 
 namespace Wanderer::Engine::World
 {
+	extern bool drawGridLines;
+	extern float gridLineWidth;
+
 	extern float terrainScale;
 
 	extern int chunkSize;

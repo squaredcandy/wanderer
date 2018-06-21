@@ -15,6 +15,7 @@ const MeshID	MESH_PLANE			= 01;
 
 const ShaderID	SHADER_TERRAIN		= 00;
 const ShaderID	SHADER_TESS			= 01;
+const ShaderID	SHADER_NORM			= 02;
 
 const CameraID	CAMERA_PLAYER		= 00;
 

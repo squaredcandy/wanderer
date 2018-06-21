@@ -61,6 +61,9 @@ namespace Wanderer::Engine::Debug
 		{
 			EDITVALUEN(World::terrainScale, "Terrain Scale");
 
+			ImGui::Checkbox("Draw Grid Lines", &World::drawGridLines);
+			ImGui::SliderFloat("Grid Line Width", &World::gridLineWidth, 0.f, 1.f);
+
 			ImGui::PushItemWidth(200);
 			ImGui::InputInt("Height Seed", &World::heightSeed);
 			ImGui::PopItemWidth();

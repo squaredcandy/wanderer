@@ -52,6 +52,7 @@ struct DebugData
 
 	DebugData()
 	{
+		drawArrays = true;
 		heightFactor = 20;
 		
 		dLight.ambient = { 1.0f, 0.9f, 0.9f };
@@ -69,6 +70,8 @@ struct DebugData
 
 namespace Wanderer::Engine::World
 {
+	extern bool drawGridLines;
+	extern float gridLineWidth;
 	extern float terrainScale;
 	extern int heightSeed;
 	extern int chunkSize;

@@ -20,7 +20,7 @@ namespace Wanderer::Engine::World
 	FastNoise::FractalType fracType	= FastNoise::FBM;
 
 	bool drawGridLines	= true;
-	float gridLineWidth	= 0.99f;
+	float gridLineWidth = 0.99f;
 
 	std::vector<Chunk> chunks;
 

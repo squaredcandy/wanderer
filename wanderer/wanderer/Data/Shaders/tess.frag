@@ -5,6 +5,10 @@ in vec3 Pos_Tese_Out;
 in vec3 Nor_Tese_Out;
 in vec2 Tex_Tese_Out;
 
+//in vec3 Pos_Geom_Out;
+//in vec3 Nor_Geom_Out;
+//in vec2 Tex_Geom_Out;
+
 struct DirectionalLight
 {
 	// Ambient
@@ -15,6 +19,11 @@ struct DirectionalLight
 	vec3 direction;
 	float dIntensity;
 };
+
+uniform bool drawGridLines;
+uniform float gridLineWidth;
+
+uniform int chunkSize;
 
 uniform DirectionalLight dLight;
 uniform sampler2D heightNoise;
@@ -39,13 +48,15 @@ vec3 calcDiffuseColor()
 
 void main()
 {
-	float gridLineWidth = 0.99;
-	vec2 coords = Tex_Tese_Out * 256;
-	if(fract(coords.x) > gridLineWidth ||
-	fract(coords.y) > gridLineWidth)
+	vec2 coords = Tex_Tese_Out * chunkSize;
+	if(drawGridLines)
 	{
-		FragColor = vec4(1,1,1,1);
-		return;
+		if(fract(coords.x) > gridLineWidth ||
+		fract(coords.y) > gridLineWidth)
+		{
+			FragColor = vec4(1,1,1,1);
+			return;
+		}
 	}
 	
 	vec3 ambientColor = dLight.ambient * dLight.aIntensity;
@@ -60,7 +71,7 @@ void main()
 	{
 		diffuseColor = vec3(0,0,0);
 	}
-
+	
 	vec3 totalColor = calcDiffuseColor() * (ambientColor + diffuseColor);
 	FragColor = vec4(totalColor, 1.0);
 }

@@ -541,6 +541,8 @@
     <None Include="Data\Meshes\sphere_export.FBX" />
     <None Include="Data\Shaders\terrain.frag" />
     <None Include="Data\Shaders\terrain.geom" />
+    <None Include="Data\Shaders\terrain.tesc" />
+    <None Include="Data\Shaders\terrain.tese" />
     <None Include="Data\Shaders\terrain.vert" />
     <None Include="Data\Shaders\tess.tese" />
     <None Include="Data\Shaders\tess.frag" />
