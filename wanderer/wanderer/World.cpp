@@ -1,5 +1,7 @@
 #include "World.h"
 
+#include <lodepng/lodepng.h>
+
 namespace Wanderer::Engine::World
 {
 	float terrainScale	= 100;
@@ -19,17 +21,14 @@ namespace Wanderer::Engine::World
 	FastNoise::NoiseType noiseType	= FastNoise::PerlinFractal;
 	FastNoise::FractalType fracType	= FastNoise::FBM;
 
-	bool drawGridLines	= true;
+	bool drawGridLines	= false;
 	float gridLineWidth = 0.99f;
 
 	std::vector<Chunk> chunks;
 
 	void RandomiseSeed()
 	{
-		std::random_device rd;
-		std::mt19937 rng(rd());
-		std::uniform_int<int> dist(0, 1337);
-		heightSeed = abs(dist(rng));
+		heightSeed = Random::RandomInt(1337);
 	}
 
 	void GenerateMap(Chunk& chunk, FastNoise& fn)
@@ -45,7 +44,25 @@ namespace Wanderer::Engine::World
 				//auto y = (FN_DECIMAL) (j + (int) offset[2]);
 				auto x = (FN_DECIMAL) i;
 				auto y = (FN_DECIMAL) j;
-				chunk.chunk[i + j * chunkSize] = fn.GetNoise(x, y) + increase;
+				auto pos = i + j * chunkSize;
+
+// 				const float offset = 1.f;
+// 				float hL = fn.GetNoise(x - offset, y);
+// 				float hR = fn.GetNoise(x + offset, y);
+// 				float hD = fn.GetNoise(x, y - offset);
+// 				float hU = fn.GetNoise(x, y + offset);
+// 
+// 				glm::vec3 n;
+// 				n.x = hL - hR;
+// 				n.y = hD - hU;
+// 				n.z = 1.0;
+// 				n = glm::normalize(n);
+// 
+// 				chunk.chunk[pos].r = n.x;
+// 				chunk.chunk[pos].g = n.z;
+// 				chunk.chunk[pos].b = n.y;
+				chunk.chunk[pos] = fn.GetNoise(x, y) + increase;
+				//chunk.chunk[pos].a = 1.0f;
 				//loadingNum++;
 			}
 		}
@@ -74,6 +91,24 @@ namespace Wanderer::Engine::World
 		{
 			GenerateMap(chunk, fnHeight);
 			Textures::LoadWorldMap(CHUNK_TERRAIN, chunk.chunk, chunkSize);
+
+			std::vector<unsigned char> a;
+
+			a.reserve(chunk.chunk.size() * 4);
+
+			for (auto& val : chunk.chunk)
+			{
+				unsigned char b = val >= 0 ? val * 255 : 0;
+				a.emplace_back(b);
+				a.emplace_back(b);
+				a.emplace_back(b);
+				a.emplace_back(255);
+			}
+			unsigned error = lodepng::encode("test.png", a, chunkSize, chunkSize);
+			if (error)
+			{
+				printf("Encode Error: %u %s\n", error, lodepng_error_text(error));
+			}
 		}
 	}
 }

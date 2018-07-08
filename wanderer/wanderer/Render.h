@@ -9,17 +9,28 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "World.h"
+#include "Dungeon.h"
 
-const MeshID	MESH_SPHERE			= 00;
-const MeshID	MESH_PLANE			= 01;
+const MeshID	MESH_SPHERE			= 00U;
+const MeshID	MESH_PLANE			= 01U;
+const MeshID	MESH_WALL			= 02U;
+const MeshID	MESH_DOORARCH		= 04U;
+const MeshID	MESH_GATE			= 05U;
+const MeshID	MESH_DOORCAP		= 06U;
 
-const ShaderID	SHADER_TERRAIN		= 00;
-const ShaderID	SHADER_TESS			= 01;
-const ShaderID	SHADER_NORM			= 02;
+const ShaderID	SHADER_TERRAIN		= 00U;
+const ShaderID	SHADER_NORMAL		= 01U;
+const ShaderID	SHADER_BASIC		= 02U;
+const ShaderID	SHADER_SHADOW		= 03U;
+const ShaderID	SHADER_DUNGEON		= 04U;
 
-const CameraID	CAMERA_PLAYER		= 00;
+const CameraID	CAMERA_PLAYER		= 00U;
 
-const TextureID TEX_TERRAIN_HEIGHT	= 00;
+const TextureID TEX_TERRAIN_HEIGHT	= 00U;
+const TextureID TEX_STONEWALL		= 01U;
+const TextureID TEX_COBBLE			= 02U;
+const TextureID TEX_ARCH			= 03U;
+const TextureID TEX_STEELRUST		= 03U;
 
 const int		CHUNK_LENGTH		= 1;
 
@@ -44,6 +55,7 @@ namespace Wanderer::Engine::Render
 	// Set the buffers we will use 
 	extern BufferID drawBufferID;
 	extern BufferID msaaBufferID;
+	extern BufferID shdwBufferID;
 
 	// Vector to store the opaque objects
 	extern std::vector<ModelInstance> opaqueObjects;
@@ -69,6 +81,8 @@ namespace Wanderer::Engine::Render
 	void CopyMSAABufferToDrawBuffer(GLuint msaaBuffer, 
 									GLuint drawBuffer, 
 									ImVec2& size);
-	void EndFrameBufferDrawing(GLuint drawBuffer, ImVec2& size, ImVec2& pos);
+	void EndFrameBufferDrawing(GLuint64 drawBuffer, ImVec2& size, ImVec2& pos);
+
 	void RenderWorld();
+	void RenderDungeon();
 }

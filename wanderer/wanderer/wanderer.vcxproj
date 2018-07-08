@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="Dungeon.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entities.cpp" />
     <ClCompile Include="ext\FastNoise\FastNoise.cpp" />
@@ -139,9 +140,11 @@
     <ClCompile Include="ext\ImGui\imgui_draw.cpp" />
     <ClCompile Include="ext\ImGui\imgui_freetype.cpp" />
     <ClCompile Include="ext\ImGui\imgui_impl.cpp" />
+    <ClCompile Include="ext\lodepng\lodepng.cpp" />
     <ClCompile Include="Flags.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Random.cpp" />
     <ClCompile Include="Reflection.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -154,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="Dungeon.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Entities.h" />
     <ClInclude Include="Entity.h" />
@@ -442,6 +446,7 @@
     <ClInclude Include="ext\ImGui\stb_rect_pack.h" />
     <ClInclude Include="ext\ImGui\stb_textedit.h" />
     <ClInclude Include="ext\ImGui\stb_truetype.h" />
+    <ClInclude Include="ext\lodepng\lodepng.h" />
     <ClInclude Include="ext\SDL\begin_code.h" />
     <ClInclude Include="ext\SDL\close_code.h" />
     <ClInclude Include="ext\SDL\SDL.h" />
@@ -526,6 +531,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Module.h" />
+    <ClInclude Include="Random.h" />
     <ClInclude Include="Reflection.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Scene.h" />
@@ -535,19 +541,33 @@
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Meshes\arch_cap_export.FBX" />
+    <None Include="Data\Meshes\arch_export.FBX" />
+    <None Include="Data\Meshes\box_export.FBX" />
     <None Include="Data\Meshes\cylinder_export.FBX" />
+    <None Include="Data\Meshes\door_export.FBX" />
+    <None Include="Data\Meshes\door_open_export.FBX" />
+    <None Include="Data\Meshes\gate_export.FBX" />
     <None Include="Data\Meshes\plane_big_export.FBX" />
     <None Include="Data\Meshes\plane_export.FBX" />
     <None Include="Data\Meshes\sphere_export.FBX" />
+    <None Include="Data\Meshes\wall_export.FBX" />
+    <None Include="Data\Shaders\basic.frag" />
+    <None Include="Data\Shaders\basic.vert" />
+    <None Include="Data\Shaders\dungeon.frag" />
+    <None Include="Data\Shaders\dungeon.vert" />
+    <None Include="Data\Shaders\normal.frag" />
+    <None Include="Data\Shaders\normal.geom" />
+    <None Include="Data\Shaders\normal.tesc" />
+    <None Include="Data\Shaders\normal.tese" />
+    <None Include="Data\Shaders\normal.vert" />
+    <None Include="Data\Shaders\shadow.frag" />
+    <None Include="Data\Shaders\shadow.vert" />
     <None Include="Data\Shaders\terrain.frag" />
     <None Include="Data\Shaders\terrain.geom" />
     <None Include="Data\Shaders\terrain.tesc" />
     <None Include="Data\Shaders\terrain.tese" />
     <None Include="Data\Shaders\terrain.vert" />
-    <None Include="Data\Shaders\tess.tese" />
-    <None Include="Data\Shaders\tess.frag" />
-    <None Include="Data\Shaders\tess.tesc" />
-    <None Include="Data\Shaders\tess.vert" />
     <None Include="ext\assimp\color4.inl" />
     <None Include="ext\assimp\material.inl" />
     <None Include="ext\assimp\matrix3x3.inl" />
@@ -667,13 +687,24 @@
     <None Include="ext\glm\gtx\vector_angle.inl" />
     <None Include="ext\glm\gtx\vector_query.inl" />
     <None Include="ext\glm\gtx\wrap.inl" />
-    <None Include="Data\Shaders\tess.geom" />
+    <None Include="Data\Shaders\shadow.tesc" />
+    <None Include="Data\Shaders\shadow.tese" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="ProggyClean.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="ext\ImGui\imgui.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Data\Textures\arch_uv.png" />
+    <Image Include="Data\Textures\MedievalCobblestone2_1024_albedo.png" />
+    <Image Include="Data\Textures\SteelRusted_1K_albedo.png" />
+    <Image Include="Data\Textures\StoneWall_1024_albedo.png" />
+    <Image Include="Data\Textures\StoneWall_1024_ao.png" />
+    <Image Include="Data\Textures\StoneWall_1024_height.png" />
+    <Image Include="Data\Textures\StoneWall_1024_normal.png" />
+    <Image Include="Data\Textures\StoneWall_1024_roughness.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

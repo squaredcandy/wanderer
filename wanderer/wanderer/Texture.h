@@ -1,10 +1,13 @@
 #pragma once
 
 #include <map>
+#include <string>
+#include <iostream>
 #include <vector>
 #include <memory>
 
 #include <GL/gl3w.h>
+#include <glm/glm.hpp>
 
 struct Texture
 {
@@ -47,7 +50,9 @@ struct Chunk;
 namespace Wanderer::Engine::Textures
 {
 	void Cleanup();
+	Material * CreateMaterial(TextureID id);
 	Material * GetMaterial(TextureID id);
-	void LoadMaterial(TextureID id, std::string filename);
+	void LoadStaticMaterial(TextureID id, std::string fileName, Material::TextureType texType);
+	//void LoadMaterial(TextureID id, std::string filename);
 	void LoadWorldMap(TextureID id, std::vector<float>& chunk, int size);
 }

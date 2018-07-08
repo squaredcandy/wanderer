@@ -17,12 +17,12 @@ namespace Wanderer::Engine::Camera
 		auto& cam = cameras[currentCamera];
 
 		float movSpeed = cam.translateSpeed * deltaTime;
-		if (ImGui::GetIO().KeysDown[SDL_SCANCODE_W]) cam.translation += cam.forwardVector * movSpeed;
-		if (ImGui::GetIO().KeysDown[SDL_SCANCODE_S]) cam.translation -= cam.forwardVector * movSpeed;
-		if (ImGui::GetIO().KeysDown[SDL_SCANCODE_D]) cam.translation += cam.rightVector * movSpeed;
-		if (ImGui::GetIO().KeysDown[SDL_SCANCODE_A]) cam.translation -= cam.rightVector * movSpeed;
-		if (ImGui::GetIO().KeysDown[SDL_SCANCODE_Q]) cam.translation += cam.upVector * movSpeed; 
-		if (ImGui::GetIO().KeysDown[SDL_SCANCODE_E]) cam.translation -= cam.upVector * movSpeed;
+		if (ImGui::IsKeyDown(SDL_SCANCODE_W)) cam.translation += cam.forwardVector * movSpeed;
+		if (ImGui::IsKeyDown(SDL_SCANCODE_S)) cam.translation -= cam.forwardVector * movSpeed;
+		if (ImGui::IsKeyDown(SDL_SCANCODE_D)) cam.translation += cam.rightVector * movSpeed;
+		if (ImGui::IsKeyDown(SDL_SCANCODE_A)) cam.translation -= cam.rightVector * movSpeed;
+		if (ImGui::IsKeyDown(SDL_SCANCODE_Q)) cam.translation += cam.upVector * movSpeed;
+		if (ImGui::IsKeyDown(SDL_SCANCODE_E)) cam.translation -= cam.upVector * movSpeed;
 	}
 
 	void CameraRotation(float deltaTime, ImVec2& size, ImVec2& pos)

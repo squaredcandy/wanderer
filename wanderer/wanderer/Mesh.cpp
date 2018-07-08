@@ -7,35 +7,104 @@ namespace Wanderer::Engine::Meshes
 	void InitBuffer(Mesh& mesh)
 	{
 		// Create and bind vertex and index data
+
 		GLuint size = sizeof(Vertex);
+		CreateVAO(mesh);
+		CreateVBO(mesh, size);
+		CreateEBO(mesh);
+
+		AddAttribute(mesh, 0, 3, size, offsetof(Vertex, Vertex::Position));
+		AddAttribute(mesh, 1, 3, size, offsetof(Vertex, Vertex::Normal));
+		AddAttribute(mesh, 2, 2, size, offsetof(Vertex, Vertex::TexCoords));
+		AddAttribute(mesh, 3, 3, size, offsetof(Vertex, Vertex::Tangent));
+		AddAttribute(mesh, 4, 3, size, offsetof(Vertex, Vertex::Bitangent));
+	}
+
+	void CreateVAO(Mesh& mesh)
+	{
 		glGenVertexArrays(1, &mesh.VAO);
+		glBindVertexArray(mesh.VAO);
+		glBindVertexArray(0);
+	}
+
+	void CreateVBO(Mesh& mesh, GLuint dataSize)
+	{
 		glGenBuffers(1, &mesh.VBO);
-		glGenBuffers(1, &mesh.EBO);
 		glBindVertexArray(mesh.VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-		glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * size, 
+		glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex),
 					 &mesh.vertices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	void CreateVBO(GLuint& vao, GLuint& vbo, GLuint64 size, void * data, GLuint drawType)
+	{
+		glGenBuffers(1, &vbo);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, size, data, drawType);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	void CreateEBO(Mesh& mesh)
+	{
+		glGenBuffers(1, &mesh.EBO);
+		glBindVertexArray(mesh.VAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
-					 mesh.indices.size() * sizeof(GLuint), 
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(GLuint),
 					 &mesh.indices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, size,
-			(void*) nullptr);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, size,
-			(void*) offsetof(Vertex, Vertex::Normal));
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, size,
-			(void*) offsetof(Vertex, Vertex::TexCoords));
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, size,
-			(void*) offsetof(Vertex, Vertex::Tangent));
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, size,
-			(void*) offsetof(Vertex, Vertex::Bitangent));
+	void AddAttribute(Mesh& mesh, int attribute, int dataSize, 
+					  GLuint dataLength, GLuint64 offset)
+	{
+		glBindVertexArray(mesh.VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
+ 		glEnableVertexAttribArray(attribute);
+		glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE, 
+							  dataLength, (GLvoid*) offset);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
 
+	void AddAttribute(GLuint& vao, GLuint& vbo, int attribute, int dataSize, 
+					  GLuint dataLength, GLuint64 offset)
+	{
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glEnableVertexAttribArray(attribute);
+		glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE,
+							  dataLength, (GLvoid*) offset);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	void AddInstancedAttribute(Mesh& mesh, int attribute, int dataSize, 
+							   GLuint dataLength, GLuint64 offset)
+	{
+		glBindVertexArray(mesh.VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
+ 		glEnableVertexAttribArray(attribute);
+		glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE, 
+							  dataLength, (GLvoid*) offset);
+		glVertexAttribDivisor(attribute, 1);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	void AddInstancedAttribute(GLuint& vao, GLuint& vbo, int attribute, int dataSize,
+					  GLuint dataLength, GLuint64 offset)
+	{
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glEnableVertexAttribArray(attribute);
+		glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE,
+							  dataLength, (GLvoid*) offset);
+		glVertexAttribDivisor(attribute, 1);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
@@ -119,24 +188,28 @@ namespace Wanderer::Engine::Meshes
 		}
 	}
 	
-	void LoadModel(MeshID key, std::string path)
+	Mesh * LoadModel(MeshID key, std::string path)
 	{
 		Assimp::Importer importer;
 		path.insert(0, "Data/Meshes/");
 		const aiScene * scene = importer.ReadFile(path,
-												  aiProcess_Triangulate |
-												  aiProcess_FlipUVs |
-												  aiProcess_CalcTangentSpace |
-												  aiProcess_OptimizeMeshes);
+												  aiProcessPreset_TargetRealtime_MaxQuality);
+												  //aiProcess_Triangulate |
+												  //aiProcess_FlipUVs |
+												  //aiProcess_CalcTangentSpace |
+												  //aiProcess_OptimizeMeshes | 
+												  //aiProcess_OptimizeGraph | 
+												  //aiProcess_JoinIdenticalVertices);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || 
 			!scene->mRootNode)
 		{
 			printf("ERROR :: ASSIMP :: %s\n", importer.GetErrorString());
-			return;
+			return nullptr;
 		}
 		ProcessNode(key, scene->mRootNode, scene);
 		printf("Model Loaded: %s\n", 
 			   path.substr(path.find_last_of('/') + 1).c_str());
+		return &meshes[key];
 	}
 
 	void Cleanup()

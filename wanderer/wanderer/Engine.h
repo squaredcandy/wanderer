@@ -14,27 +14,6 @@
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl.h>
 
-namespace Wanderer::Engine::Render
-{
-	void Cleanup();
-	void RenderWorld();
-}
-
-namespace Wanderer::Engine::Meshes
-{
-	void Cleanup();
-}
-
-namespace Wanderer::Engine::Shaders
-{
-	void Cleanup();
-}
-
-namespace Wanderer::Engine::Textures
-{
-	void Cleanup();
-}
-
 struct ModelInstance
 {
 
@@ -42,6 +21,29 @@ struct ModelInstance
 
 namespace Wanderer::Engine
 {
+	namespace Render
+	{
+		void Cleanup();
+		void RenderWorld();
+		void RenderDungeon();
+	}
+	namespace Meshes
+	{
+		void Cleanup();
+	}
+	namespace Shaders
+	{
+		void Cleanup();
+	}
+	namespace Textures
+	{
+		void Cleanup();
+	}
+	namespace Dungeon
+	{
+		void Cleanup();
+	}
+
 	// Window and Context handlers
 	extern SDL_Window * window;
 	extern SDL_GLContext context;

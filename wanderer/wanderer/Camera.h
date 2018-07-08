@@ -34,7 +34,7 @@ struct CameraData
 		fov = 45.f;
 		nearPlane = 0.1f;
 		farPlane = 1000000.f;
-		translateSpeed = 10;
+		translateSpeed = 50;
 		rotateSpeed = 10;
 
 		translation = glm::vec3(-5, 5, 0);

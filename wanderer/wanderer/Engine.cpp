@@ -155,19 +155,16 @@ namespace Wanderer::Engine
 			}
 			ImGui_ImplSdlGL3_NewFrame(window);
 
-
 			auto startTimer = HR_Clock::now();
 			if(doTick) tickFunction();
 			Debug::UpdateTime(TIMER_UPDATE, startTimer);
 			
-			
 			startTimer = HR_Clock::now();
 			sceneFunction();
 			Debug::UpdateTime(TIMER_UI, startTimer);
-
-
+			
 			startTimer = HR_Clock::now();
-			Render::RenderWorld();
+			Render::RenderDungeon();
 			Debug::UpdateTime(TIMER_GRAPHICS, startTimer);
 
 			ClearWindow();
@@ -208,6 +205,7 @@ namespace Wanderer::Engine
 		Render::Cleanup();
 		Textures::Cleanup();
 		Meshes::Cleanup();
+		Dungeon::Cleanup();
 		
 		FT_Done_Face(Font::fontFace);
 		FT_Done_FreeType(Font::fontLib);

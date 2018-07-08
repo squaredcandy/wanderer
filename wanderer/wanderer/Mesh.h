@@ -31,7 +31,20 @@ using MeshID = unsigned int;
 
 namespace Wanderer::Engine::Meshes
 {
+	void CreateVAO(Mesh& mesh);
+	void CreateVBO(Mesh& mesh, GLuint dataSize);
+	void CreateVBO(GLuint& vao, GLuint& vbo, GLuint64 size, 
+				   void * data, GLuint drawType);
+	void CreateEBO(Mesh& mesh);
+	void AddAttribute(Mesh& mesh, int attribute, int dataSize, 
+					  GLuint dataLength, GLuint64 offset);
+	void AddAttribute(GLuint& vao, GLuint& vbo, int attribute, int dataSize,
+					  GLuint dataLength, GLuint64 offset);
+	void AddInstancedAttribute(Mesh& mesh, int attribute, int dataSize, 
+							   GLuint dataLength, GLuint64 offset);
+	void AddInstancedAttribute(GLuint& vao, GLuint& vbo, int attribute, 
+							   int dataSize, GLuint dataLength, GLuint64 offset);
 	Mesh * GetModel(MeshID key);
-	void LoadModel(MeshID key, std::string path);
+	Mesh * LoadModel(MeshID key, std::string path);
 	void Cleanup();
 }

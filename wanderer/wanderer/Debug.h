@@ -32,7 +32,7 @@ using DebugArray = std::array<float, DEBUG_LENGTH>;
 struct DebugData
 {
 	bool wireframe;
-	bool drawArrays;
+	//bool drawArrays;
 	
 	float heightFactor;
 	
@@ -52,14 +52,14 @@ struct DebugData
 
 	DebugData()
 	{
-		drawArrays = true;
-		heightFactor = 20;
+		//drawArrays = true;
+		heightFactor = 200;
 		
-		dLight.ambient = { 1.0f, 0.9f, 0.9f };
-		dLight.aIntensity = 1.f;
+		dLight.ambient = { 1.0f, 1.f, 1.f };
+		dLight.aIntensity = 0.5f;
 
 		dLight.direction = { 0, 1, 0 };
-		dLight.dIntensity = 1.f;
+		dLight.dIntensity = 0.25f;
 
 		lodDist = { 50, 100, 500, 1000, 10000 };
 		tesLevel = { 30, 20, 12, 4, 2 };

@@ -103,6 +103,27 @@
     <Filter Include="Header Files\src\engine\rendering">
       <UniqueIdentifier>{2a36bd7c-5f1e-4eaf-95fa-6c2156bdb1f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\data\shaders\terrain">
+      <UniqueIdentifier>{62a5d612-bf7f-4826-a6b3-2c04e040f2cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\data\shaders\normal">
+      <UniqueIdentifier>{7d6ec390-5d77-4eaa-847b-b2d540e0385f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\data\shaders\basic">
+      <UniqueIdentifier>{85354314-857a-45ab-98dd-bdeb71aab5fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ext\lodepng">
+      <UniqueIdentifier>{6b450922-b588-4d36-863c-87500fa5362e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ext\lodepng">
+      <UniqueIdentifier>{ec144841-f103-4dc2-b62c-0d965a02e9f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\data\shaders\shadow">
+      <UniqueIdentifier>{0f108b18-cf61-4aef-906f-0378bbe477e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\data\shaders\dungeon">
+      <UniqueIdentifier>{e2fdd833-02e6-48af-a2ad-3427e9485cd2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ext\glm\detail\glm.cpp">
@@ -128,9 +149,6 @@
     </ClCompile>
     <ClCompile Include="ext\ImGui\imgui_impl.cpp">
       <Filter>Source Files\ext\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="wanderer.cpp">
-      <Filter>Source Files\src\game</Filter>
     </ClCompile>
     <ClCompile Include="Engine.cpp">
       <Filter>Source Files\src\engine</Filter>
@@ -173,6 +191,18 @@
     </ClCompile>
     <ClCompile Include="Reflection.cpp">
       <Filter>Source Files\src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\lodepng\lodepng.cpp">
+      <Filter>Source Files\ext\lodepng</Filter>
+    </ClCompile>
+    <ClCompile Include="Dungeon.cpp">
+      <Filter>Source Files\src\engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Random.cpp">
+      <Filter>Source Files\src\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="wanderer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1301,6 +1331,15 @@
     <ClInclude Include="Reflection.h">
       <Filter>Header Files\src\engine</Filter>
     </ClInclude>
+    <ClInclude Include="ext\lodepng\lodepng.h">
+      <Filter>Header Files\ext\lodepng</Filter>
+    </ClInclude>
+    <ClInclude Include="Dungeon.h">
+      <Filter>Header Files\src\engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Random.h">
+      <Filter>Header Files\src\engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ext\glm\gtx\associated_min_max.inl">
@@ -1669,35 +1708,84 @@
     <None Include="Data\Meshes\sphere_export.FBX">
       <Filter>Resource Files\data\meshes</Filter>
     </None>
-    <None Include="Data\Shaders\terrain.frag">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
-    <None Include="Data\Shaders\terrain.geom">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
-    <None Include="Data\Shaders\terrain.vert">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
-    <None Include="Data\Shaders\tess.frag">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
-    <None Include="Data\Shaders\tess.tesc">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
-    <None Include="Data\Shaders\tess.vert">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
-    <None Include="Data\Shaders\tess.tese">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
-    <None Include="Data\Shaders\tess.geom">
-      <Filter>Resource Files\data\shaders</Filter>
-    </None>
     <None Include="Data\Meshes\plane_big_export.FBX">
       <Filter>Resource Files\data\meshes</Filter>
     </None>
-    <None Include="Data\Shaders\terrain.tesc" />
-    <None Include="Data\Shaders\terrain.tese" />
+    <None Include="Data\Shaders\terrain.frag">
+      <Filter>Resource Files\data\shaders\terrain</Filter>
+    </None>
+    <None Include="Data\Shaders\terrain.geom">
+      <Filter>Resource Files\data\shaders\terrain</Filter>
+    </None>
+    <None Include="Data\Shaders\terrain.tesc">
+      <Filter>Resource Files\data\shaders\terrain</Filter>
+    </None>
+    <None Include="Data\Shaders\terrain.tese">
+      <Filter>Resource Files\data\shaders\terrain</Filter>
+    </None>
+    <None Include="Data\Shaders\terrain.vert">
+      <Filter>Resource Files\data\shaders\terrain</Filter>
+    </None>
+    <None Include="Data\Shaders\normal.frag">
+      <Filter>Resource Files\data\shaders\normal</Filter>
+    </None>
+    <None Include="Data\Shaders\normal.geom">
+      <Filter>Resource Files\data\shaders\normal</Filter>
+    </None>
+    <None Include="Data\Shaders\normal.tesc">
+      <Filter>Resource Files\data\shaders\normal</Filter>
+    </None>
+    <None Include="Data\Shaders\normal.tese">
+      <Filter>Resource Files\data\shaders\normal</Filter>
+    </None>
+    <None Include="Data\Shaders\normal.vert">
+      <Filter>Resource Files\data\shaders\normal</Filter>
+    </None>
+    <None Include="Data\Shaders\basic.frag">
+      <Filter>Resource Files\data\shaders\basic</Filter>
+    </None>
+    <None Include="Data\Shaders\basic.vert">
+      <Filter>Resource Files\data\shaders\basic</Filter>
+    </None>
+    <None Include="Data\Shaders\shadow.frag">
+      <Filter>Resource Files\data\shaders\shadow</Filter>
+    </None>
+    <None Include="Data\Shaders\shadow.vert">
+      <Filter>Resource Files\data\shaders\shadow</Filter>
+    </None>
+    <None Include="Data\Shaders\shadow.tese">
+      <Filter>Resource Files\data\shaders\shadow</Filter>
+    </None>
+    <None Include="Data\Shaders\shadow.tesc">
+      <Filter>Resource Files\data\shaders\shadow</Filter>
+    </None>
+    <None Include="Data\Meshes\box_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
+    <None Include="Data\Meshes\wall_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
+    <None Include="Data\Shaders\dungeon.frag">
+      <Filter>Resource Files\data\shaders\dungeon</Filter>
+    </None>
+    <None Include="Data\Shaders\dungeon.vert">
+      <Filter>Resource Files\data\shaders\dungeon</Filter>
+    </None>
+    <None Include="Data\Meshes\arch_cap_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
+    <None Include="Data\Meshes\arch_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
+    <None Include="Data\Meshes\door_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
+    <None Include="Data\Meshes\door_open_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
+    <None Include="Data\Meshes\gate_export.FBX">
+      <Filter>Resource Files\data\meshes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="ProggyClean.ttf">
@@ -1706,5 +1794,31 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="ext\ImGui\imgui.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Data\Textures\MedievalCobblestone2_1024_albedo.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
+    <Image Include="Data\Textures\StoneWall_1024_albedo.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
+    <Image Include="Data\Textures\StoneWall_1024_ao.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
+    <Image Include="Data\Textures\StoneWall_1024_height.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
+    <Image Include="Data\Textures\StoneWall_1024_normal.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
+    <Image Include="Data\Textures\StoneWall_1024_roughness.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
+    <Image Include="Data\Textures\arch_uv.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
+    <Image Include="Data\Textures\SteelRusted_1K_albedo.png">
+      <Filter>Resource Files\data\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

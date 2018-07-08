@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Texture.h"
+#include "Random.h"
 
 #include <random>
 #include <vector>
