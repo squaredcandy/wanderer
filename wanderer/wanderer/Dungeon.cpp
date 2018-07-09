@@ -4,9 +4,18 @@
 
 namespace Wanderer::Engine::Dungeon
 {
+	float gateSpeed = 15.f;
+	float doorMaxHeight = 7.f;
+
 	DungeonID last;
 	DungeonID current;
 	std::map<DungeonID ,DungeonStruct> dMap;
+
+	const std::string archID = "DoorArch";
+	const std::string archCapID = "DoorArchCap";
+	const std::string gateID = "Gate";
+	const std::string floorID = "Floor";
+	const std::string wallID = "Wall";
 
 	DungeonID GenerateNewID()
 	{
@@ -14,7 +23,7 @@ namespace Wanderer::Engine::Dungeon
 		return lastID++;
 	}
 
-	DungeonStruct GetCurrentLevel()
+	DungeonStruct& GetCurrentLevel()
 	{
 		return dMap[current];
 	}
@@ -28,14 +37,88 @@ namespace Wanderer::Engine::Dungeon
 		return dMap[current].tiles[x + y * dMap[current].width];
 	}
 
-	using ModelFunc = std::function<void(MODEL_FUNC_ARGS)>;
+	// Checks
+	namespace
+	{
+		bool IsFloorTile(int x, int y)
+		{
+			auto tile = GetTile(x, y);
+			return (tile == Tile::Floor ||
+					tile == Tile::DownStairs ||
+					tile == Tile::UpStairs ||
+					tile == Tile::OpenDoor ||
+					tile == Tile::ClosedDoor);
+		}
 
+		bool IsWallTile(int x, int y)
+		{
+			auto tile = GetTile(x, y);
+			return (tile == Tile::Wall);
+		}
+
+		bool IsDoorTile(int x, int y)
+		{
+			auto tile = GetTile(x, y);
+			return (tile == Tile::ClosedDoor ||
+					tile == Tile::OpeningDoor ||
+					tile == Tile::OpenDoor);
+		}
+	}
+
+	// Updates
+	namespace
+	{
+		using UpdateFunc = std::function<void(UPDATE_FUNC_ARGS)>;
+
+		void UpdateBuffer(GLuint vbo, GLintptr offset, GLsizeiptr size, GLuint mapType,
+						  UpdateFunc updateFunc)
+		{
+			void * data = glMapNamedBufferRange(vbo, offset * size, size, mapType);
+			updateFunc(vbo, data, offset, size);
+		}
+
+		void UpdateGates()
+		{
+			auto& lvl = Dungeon::GetCurrentLevel();
+
+			int gateOffset = 0;
+			for (auto & gateTile : lvl.gateTiles)
+			{
+				if (*gateTile == Tile::OpeningDoor)
+				{
+					auto gateVBO = std::get<0>(lvl.vbos[gateID]);
+					auto gateUpdate = [=] (UPDATE_FUNC_ARGS)
+					{
+						auto mData = *(glm::mat4*) data;
+						mData = glm::translate(mData, glm::vec3(0, 0, ImGui::GetIO().DeltaTime * gateSpeed));
+						// Check if the height of the translation of the matrix is above the max
+						if (glm::vec3(mData[3]).y >= doorMaxHeight)
+						{
+							*gateTile = Tile::OpenDoor;
+						}
+						glUnmapNamedBuffer(vbo);
+						glNamedBufferSubData(vbo, offset * size, size, &mData);
+					};
+
+					UpdateBuffer(gateVBO, gateOffset, sizeof(glm::mat4), GL_MAP_WRITE_BIT, gateUpdate);
+				}
+				gateOffset++;
+			}
+		}
+	}
+
+	void Tick()
+	{
+		UpdateGates();
+	}
+
+	using ModelFunc = std::function<void(MODEL_FUNC_ARGS)>;
 	void AddInstances(Mesh& mesh, std::string vboName, ModelFunc modelFunction, GLuint draw)
 	{
 		GLuint vbo;
 		glm::mat4 model;
-		auto& lvl = dMap[current];
 		std::vector<glm::mat4> models;
+		auto& lvl = Dungeon::GetCurrentLevel();
 
 		for (int y = 0; y < lvl.height; ++y)
 		{
@@ -62,39 +145,30 @@ namespace Wanderer::Engine::Dungeon
 		lvl.vbos[vboName] = { vbo, (GLuint) models.size() };
 	}
 
-	glm::mat4 TranslateModel(glm::mat4 model, int& x, int& y, int& height, int& width, 
-							 float heightOffset = 0)
+	glm::mat4 InitialModelTranslation(glm::mat4 model, int& x, int& y, int& height, int& width, float heightOffset = 0)
 	{
 		return glm::translate(model,
 			glm::vec3((y * -10) + (height * 5), heightOffset, (x * 10) - (width * 5)));
 	}
 
-	bool IsFloorTile(int x, int y)
+	void DeleteInstances()
 	{
-		auto tile = GetTile(x, y);
-		return (tile == Tile::Floor ||
-				tile == Tile::DownStairs ||
-				tile == Tile::UpStairs ||
-				tile == Tile::OpenDoor ||
-				tile == Tile::ClosedDoor);
-	}
-
-	bool IsWallTile(int x, int y)
-	{
-		auto tile = GetTile(x, y);
-		return (tile == Tile::Wall);
+		auto& lvl = GetCurrentLevel();
+		for (auto& vbo : lvl.vbos)
+		{
+			glDeleteBuffers(1, &std::get<0>(vbo.second));
+		}
+		lvl.vbos.clear();
 	}
 
 	void AddArchInstances(Mesh& mesh)
 	{
-		std::string vboName{ "DoorArch" };
-
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
 			auto tile = GetTile(x, y);
 			if (tile == Tile::ClosedDoor || tile == Tile::OpenDoor)
 			{
-				auto model = TranslateModel(glm::mat4(), x, y, lvl.height, lvl.width);
+				auto model = InitialModelTranslation(glm::mat4(), x, y, lvl.height, lvl.width);
 				if (IsWallTile(x + 1, y) && IsWallTile(x - 1, y))
 				{
 					model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
@@ -107,19 +181,17 @@ namespace Wanderer::Engine::Dungeon
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, vboName, modelFunction, GL_STATIC_DRAW);
+		AddInstances(mesh, archID, modelFunction, GL_STATIC_DRAW);
 	}
 
 	void AddArchCapInstances(Mesh& mesh)
 	{
-		std::string vboName{ "DoorArchCap" };
-
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
 			auto tile = GetTile(x, y);
 			if (tile == Tile::ClosedDoor || tile == Tile::OpenDoor)
 			{
-				auto model = TranslateModel(glm::mat4(), x, y, lvl.height, lvl.width, 7.f);
+				auto model = InitialModelTranslation(glm::mat4(), x, y, lvl.height, lvl.width, 7.f);
 				model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
 				if (!(IsWallTile(x + 1, y) && IsWallTile(x - 1, y)))
 				{
@@ -128,59 +200,62 @@ namespace Wanderer::Engine::Dungeon
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, vboName, modelFunction, GL_STATIC_DRAW);
+		AddInstances(mesh, archCapID, modelFunction, GL_STATIC_DRAW);
 	}
 
 	void AddGateInstances(Mesh& mesh)
 	{
-		std::string vboName{ "Gate" };
-
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
 			auto open = -1;
 			auto tile = GetTile(x, y);
 			if (tile == Tile::ClosedDoor) open = 0;
 			else if (tile == Tile::OpenDoor) open = 1;
+			// Safety check so that we don't lose the door
+			else if (tile == Tile::OpeningDoor)
+			{
+				tile = Tile::OpenDoor;
+				open = 1;
+			}
 			if (open != -1)
 			{
-				auto model = TranslateModel(glm::mat4(), x, y, lvl.height, lvl.width,
-					(open) ? 8.f : 0.f);
+				auto model = InitialModelTranslation(glm::mat4(), x, y, lvl.height, lvl.width,
+					(open) ? doorMaxHeight : 0.f);
 				model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
 				if (!(IsWallTile(x + 1, y) && IsWallTile(x - 1, y)))
 				{
 					model = glm::rotate(model, glm::radians(-90.f), glm::vec3(0, 0, 1));
 				}
+				// Add the gates to another vector so we can check when they open and dont have iterator over
+				// the intial tile vector which can get very expensive
+				lvl.gateTiles.emplace_back(&dMap[current].tiles[x + y * dMap[current].width]);
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, vboName, modelFunction, GL_DYNAMIC_DRAW);
+		AddInstances(mesh, gateID, modelFunction, GL_DYNAMIC_DRAW);
 	}
 
 	void AddFloorInstances(Mesh& mesh)
 	{
-		std::string vboName{ "Floor" };
-
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
 			if (IsFloorTile(x, y))
 			{
-				auto model = TranslateModel(glm::mat4(), x, y, lvl.height, lvl.width);
+				auto model = InitialModelTranslation(glm::mat4(), x, y, lvl.height, lvl.width);
 				model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, vboName, modelFunction, GL_STATIC_DRAW);
+		AddInstances(mesh, floorID, modelFunction, GL_STATIC_DRAW);
 	}
 
 	void AddWallInstances(Mesh& mesh)
 	{
-		std::string vboName{ "Wall" };
-
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
 			if(GetTile(x, y) == Tile::Wall)
 			{
-				auto model = TranslateModel(glm::mat4(), x, y, lvl.height, lvl.width, 5.f);
+				auto model = InitialModelTranslation(glm::mat4(), x, y, lvl.height, lvl.width, 5.f);
 				// Check North
 				if (IsFloorTile(x, y - 1))
 				{
@@ -210,331 +285,354 @@ namespace Wanderer::Engine::Dungeon
 				}
 			}
 		};
-		AddInstances(mesh, vboName, modelFunction, GL_STATIC_DRAW);
+		AddInstances(mesh, wallID, modelFunction, GL_STATIC_DRAW);
 	}
 
-	void setTile(int x, int y, Tile tile)
+	namespace
 	{
-		dMap[current].tiles[x + y * dMap[current].width] = tile;
-	}
-
-	bool placeObject(Tile tile)
-	{
-		auto& lvl = dMap[current];
-		if (lvl.rooms.empty())
-			return false;
-
-		int r = Random::RandomInt((int) lvl.rooms.size()); // choose a random room
-		int x = Random::RandomInt(lvl.rooms[r].x + 1, lvl.rooms[r].x + lvl.rooms[r].z - 2);
-		int y = Random::RandomInt(lvl.rooms[r].y + 1, lvl.rooms[r].y + lvl.rooms[r].w - 2);
-
-		if (GetTile(x, y) == Tile::Floor)
+		void setTile(int x, int y, Tile tile)
 		{
-			setTile(x, y, tile);
-
-			// place one object in one room (optional)
-			lvl.rooms.erase(lvl.rooms.begin() + r);
-
-			return true;
+			dMap[current].tiles[x + y * dMap[current].width] = tile;
 		}
 
-		return false;
-	}
-
-	bool placeRect(const glm::ivec4& rect, Tile tile)
-	{
-		auto& lvl = dMap[current];
-		if (rect.x < 1 || rect.y < 1 || rect.x + rect.z > lvl.width - 1 || rect.y + rect.w > lvl.height - 1)
-			return false;
-
-		for (int y = rect.y; y < rect.y + rect.w; ++y)
-			for (int x = rect.x; x < rect.x + rect.z; ++x)
-			{
-				if (GetTile(x, y) != Tile::Unused)
-					return false; // the area already used
-			}
-
-		for (int y = rect.y - 1; y < rect.y + rect.w + 1; ++y)
-			for (int x = rect.x - 1; x < rect.x + rect.z + 1; ++x)
-			{
-				if (x == rect.x - 1 || y == rect.y - 1 || x == rect.x + rect.z || y == rect.y + rect.w)
-					setTile(x, y, Tile::Wall);
-				else
-					setTile(x, y, tile);
-			}
-
-		return true;
-	}
-
-	bool makeRoom(int x, int y, Direction dir, bool firstRoom = false)
-	{
-		static const int minRoomSize = 3;
-		static const int maxRoomSize = 6;
-
-		glm::ivec4 room;
-		room.z = Random::RandomInt(minRoomSize, maxRoomSize);
-		room.w = Random::RandomInt(minRoomSize, maxRoomSize);
-
-		if (dir == North)
-		{
-			room.x = x - room.z / 2;
-			room.y = y - room.w;
-		}
-
-		else if (dir == South)
-		{
-			room.x = x - room.z / 2;
-			room.y = y + 1;
-		}
-
-		else if (dir == West)
-		{
-			room.x = x - room.z;
-			room.y = y - room.w / 2;
-		}
-
-		else if (dir == East)
-		{
-			room.x = x + 1;
-			room.y = y - room.w / 2;
-		}
-
-		if (placeRect(room, Tile::Floor))
+		bool placeObject(Tile tile)
 		{
 			auto& lvl = dMap[current];
-			lvl.rooms.emplace_back(room);
+			if (lvl.rooms.empty())
+				return false;
 
-			if (dir != South || firstRoom) // North side
-				lvl.exits.emplace_back(glm::ivec4{ room.x, room.y - 1, room.z, 1 });
-			if (dir != North || firstRoom) // South side
-				lvl.exits.emplace_back(glm::ivec4{ room.x, room.y + room.w, room.z, 1 });
-			if (dir != East || firstRoom) // West side
-				lvl.exits.emplace_back(glm::ivec4{ room.x - 1, room.y, 1, room.w });
-			if (dir != West || firstRoom) // East side
-				lvl.exits.emplace_back(glm::ivec4{ room.x + room.z, room.y, 1, room.w });
+			int r = Random::RandomInt((int) lvl.rooms.size()); // choose a random room
+			int x = Random::RandomInt(lvl.rooms[r].x + 1, lvl.rooms[r].x + lvl.rooms[r].z - 2);
+			int y = Random::RandomInt(lvl.rooms[r].y + 1, lvl.rooms[r].y + lvl.rooms[r].w - 2);
 
-			return true;
-		}
-
-		return false;
-	}
-
-	bool makeCorridor(int x, int y, Direction dir)
-	{
-		static const int minCorridorLength = 3;
-		static const int maxCorridorLength = 6;
-
-		glm::ivec4 corridor;
-		corridor.x = x;
-		corridor.y = y;
-
-		if (Random::RandomBool()) // horizontal corridor
-		{
-			corridor.z = Random::RandomInt(minCorridorLength, maxCorridorLength);
-			corridor.w = 1;
-
-			if (dir == North)
+			if (GetTile(x, y) == Tile::Floor)
 			{
-				corridor.y = y - 1;
+				setTile(x, y, tile);
 
-				if (Random::RandomBool()) // west
-					corridor.x = x - corridor.z + 1;
-			}
-
-			else if (dir == South)
-			{
-				corridor.y = y + 1;
-
-				if (Random::RandomBool()) // west
-					corridor.x = x - corridor.z + 1;
-			}
-
-			else if (dir == West)
-				corridor.x = x - corridor.z;
-
-			else if (dir == East)
-				corridor.x = x + 1;
-		}
-
-		else // vertical corridor
-		{
-			corridor.z = 1;
-			corridor.w = Random::RandomInt(minCorridorLength, maxCorridorLength);
-
-			if (dir == North)
-				corridor.y = y - corridor.w;
-
-			else if (dir == South)
-				corridor.y = y + 1;
-
-			else if (dir == West)
-			{
-				corridor.x = x - 1;
-
-				if (Random::RandomBool()) // north
-					corridor.y = y - corridor.w + 1;
-			}
-
-			else if (dir == East)
-			{
-				corridor.x = x + 1;
-
-				if (Random::RandomBool()) // north
-					corridor.y = y - corridor.w + 1;
-			}
-		}
-
-		if (placeRect(corridor, Tile::Corridor))
-		{
-			auto& lvl = dMap[current];
-			if (dir != South && corridor.z != 1) // north side
-				lvl.exits.emplace_back(glm::ivec4{ corridor.x, corridor.y - 1, corridor.z, 1 });
-			if (dir != North && corridor.z != 1) // south side
-				lvl.exits.emplace_back(glm::ivec4{ corridor.x, corridor.y + corridor.w, corridor.z, 1 });
-			if (dir != East && corridor.w != 1) // west side
-				lvl.exits.emplace_back(glm::ivec4{ corridor.x - 1, corridor.y, 1, corridor.w });
-			if (dir != West && corridor.w != 1) // east side
-				lvl.exits.emplace_back(glm::ivec4{ corridor.x + corridor.z, corridor.y, 1, corridor.w });
-
-			return true;
-		}
-
-		return false;
-	}
-	
-	bool createFeature(int x, int y, Direction dir)
-	{
-		static const int roomChance = 50; // corridorChance = 100 - roomChance
-
-		int dx = 0;
-		int dy = 0;
-
-		if (dir == North)
-			dy = 1;
-		else if (dir == South)
-			dy = -1;
-		else if (dir == West)
-			dx = 1;
-		else if (dir == East)
-			dx = -1;
-
-		if (GetTile(x + dx, y + dy) != Tile::Floor &&
-			GetTile(x + dx, y + dy) != Tile::Corridor)
-			return false;
-
-		if (Random::RandomInt(100) < roomChance)
-		{
-			if (makeRoom(x, y, dir))
-			{
-				setTile(x, y, Tile::ClosedDoor);
+				// place one object in one room (optional)
+				lvl.rooms.erase(lvl.rooms.begin() + r);
 
 				return true;
 			}
+
+			return false;
 		}
 
-		else
-		{
-			if (makeCorridor(x, y, dir))
-			{
-				if (GetTile(x + dx, y + dy) == Tile::Floor)
-					setTile(x, y, Tile::ClosedDoor);
-				else // don't place a door between corridors
-					setTile(x, y, Tile::Corridor);
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool createFeature()
-	{
-		for (int i = 0; i < 1000; ++i)
+		bool placeRect(const glm::ivec4& rect, Tile tile)
 		{
 			auto& lvl = dMap[current];
-			if (lvl.exits.empty())
-				break;
+			if (rect.x < 1 || rect.y < 1 || rect.x + rect.z > lvl.width - 1 || rect.y + rect.w > lvl.height - 1)
+				return false;
 
-			// choose a random side of a random room or corridor
-			int r = Random::RandomInt((int) lvl.exits.size());
-			int x = Random::RandomInt(lvl.exits[r].x, lvl.exits[r].x + lvl.exits[r].z - 1);
-			int y = Random::RandomInt(lvl.exits[r].y, lvl.exits[r].y + lvl.exits[r].w - 1);
-
-			// north, south, west, east
-			for (int j = 0; j < Direction::Length; ++j)
-			{
-				if (createFeature(x, y, static_cast<Direction>(j)))
+			for (int y = rect.y; y < rect.y + rect.w; ++y)
+				for (int x = rect.x; x < rect.x + rect.z; ++x)
 				{
-					lvl.exits.erase(lvl.exits.begin() + r);
+					if (GetTile(x, y) != Tile::Unused)
+						return false; // the area already used
+				}
+
+			for (int y = rect.y - 1; y < rect.y + rect.w + 1; ++y)
+				for (int x = rect.x - 1; x < rect.x + rect.z + 1; ++x)
+				{
+					if (x == rect.x - 1 || y == rect.y - 1 || x == rect.x + rect.z || y == rect.y + rect.w)
+						setTile(x, y, Tile::Wall);
+					else
+						setTile(x, y, tile);
+				}
+
+			return true;
+		}
+
+		bool makeRoom(int x, int y, Direction dir, bool firstRoom = false)
+		{
+			static const int minRoomSize = 3;
+			static const int maxRoomSize = 6;
+
+			glm::ivec4 room;
+			room.z = Random::RandomInt(minRoomSize, maxRoomSize);
+			room.w = Random::RandomInt(minRoomSize, maxRoomSize);
+
+			if (dir == North)
+			{
+				room.x = x - room.z / 2;
+				room.y = y - room.w;
+			}
+
+			else if (dir == South)
+			{
+				room.x = x - room.z / 2;
+				room.y = y + 1;
+			}
+
+			else if (dir == West)
+			{
+				room.x = x - room.z;
+				room.y = y - room.w / 2;
+			}
+
+			else if (dir == East)
+			{
+				room.x = x + 1;
+				room.y = y - room.w / 2;
+			}
+
+			if (placeRect(room, Tile::Floor))
+			{
+				auto& lvl = dMap[current];
+				lvl.rooms.emplace_back(room);
+
+				if (dir != South || firstRoom) // North side
+					lvl.exits.emplace_back(glm::ivec4{ room.x, room.y - 1, room.z, 1 });
+				if (dir != North || firstRoom) // South side
+					lvl.exits.emplace_back(glm::ivec4{ room.x, room.y + room.w, room.z, 1 });
+				if (dir != East || firstRoom) // West side
+					lvl.exits.emplace_back(glm::ivec4{ room.x - 1, room.y, 1, room.w });
+				if (dir != West || firstRoom) // East side
+					lvl.exits.emplace_back(glm::ivec4{ room.x + room.z, room.y, 1, room.w });
+
+				return true;
+			}
+
+			return false;
+		}
+
+		bool makeCorridor(int x, int y, Direction dir)
+		{
+			static const int minCorridorLength = 3;
+			static const int maxCorridorLength = 6;
+
+			glm::ivec4 corridor;
+			corridor.x = x;
+			corridor.y = y;
+
+			if (Random::RandomBool()) // horizontal corridor
+			{
+				corridor.z = Random::RandomInt(minCorridorLength, maxCorridorLength);
+				corridor.w = 1;
+
+				if (dir == North)
+				{
+					corridor.y = y - 1;
+
+					if (Random::RandomBool()) // west
+						corridor.x = x - corridor.z + 1;
+				}
+
+				else if (dir == South)
+				{
+					corridor.y = y + 1;
+
+					if (Random::RandomBool()) // west
+						corridor.x = x - corridor.z + 1;
+				}
+
+				else if (dir == West)
+					corridor.x = x - corridor.z;
+
+				else if (dir == East)
+					corridor.x = x + 1;
+			}
+
+			else // vertical corridor
+			{
+				corridor.z = 1;
+				corridor.w = Random::RandomInt(minCorridorLength, maxCorridorLength);
+
+				if (dir == North)
+					corridor.y = y - corridor.w;
+
+				else if (dir == South)
+					corridor.y = y + 1;
+
+				else if (dir == West)
+				{
+					corridor.x = x - 1;
+
+					if (Random::RandomBool()) // north
+						corridor.y = y - corridor.w + 1;
+				}
+
+				else if (dir == East)
+				{
+					corridor.x = x + 1;
+
+					if (Random::RandomBool()) // north
+						corridor.y = y - corridor.w + 1;
+				}
+			}
+
+			if (placeRect(corridor, Tile::Corridor))
+			{
+				auto& lvl = dMap[current];
+				if (dir != South && corridor.z != 1) // north side
+					lvl.exits.emplace_back(glm::ivec4{ corridor.x, corridor.y - 1, corridor.z, 1 });
+				if (dir != North && corridor.z != 1) // south side
+					lvl.exits.emplace_back(glm::ivec4{ corridor.x, corridor.y + corridor.w, corridor.z, 1 });
+				if (dir != East && corridor.w != 1) // west side
+					lvl.exits.emplace_back(glm::ivec4{ corridor.x - 1, corridor.y, 1, corridor.w });
+				if (dir != West && corridor.w != 1) // east side
+					lvl.exits.emplace_back(glm::ivec4{ corridor.x + corridor.z, corridor.y, 1, corridor.w });
+
+				return true;
+			}
+
+			return false;
+		}
+	
+		bool createFeature(int x, int y, Direction dir)
+		{
+			static const int roomChance = 50; // corridorChance = 100 - roomChance
+
+			int dx = 0;
+			int dy = 0;
+
+			if (dir == North)
+				dy = 1;
+			else if (dir == South)
+				dy = -1;
+			else if (dir == West)
+				dx = 1;
+			else if (dir == East)
+				dx = -1;
+
+			if (GetTile(x + dx, y + dy) != Tile::Floor &&
+				GetTile(x + dx, y + dy) != Tile::Corridor)
+				return false;
+
+			if (Random::RandomInt(100) < roomChance)
+			{
+				if (makeRoom(x, y, dir))
+				{
+					setTile(x, y, Tile::ClosedDoor);
+
 					return true;
 				}
 			}
+
+			else
+			{
+				if (makeCorridor(x, y, dir))
+				{
+					if (GetTile(x + dx, y + dy) == Tile::Floor)
+						setTile(x, y, Tile::ClosedDoor);
+					else // don't place a door between corridors
+						setTile(x, y, Tile::Corridor);
+
+					return true;
+				}
+			}
+
+			return false;
 		}
 
-		return false;
+		bool createFeature()
+		{
+			for (int i = 0; i < 1000; ++i)
+			{
+				auto& lvl = dMap[current];
+				if (lvl.exits.empty())
+					break;
+
+				// choose a random side of a random room or corridor
+				int r = Random::RandomInt((int) lvl.exits.size());
+				int x = Random::RandomInt(lvl.exits[r].x, lvl.exits[r].x + lvl.exits[r].z - 1);
+				int y = Random::RandomInt(lvl.exits[r].y, lvl.exits[r].y + lvl.exits[r].w - 1);
+
+				// north, south, west, east
+				for (int j = 0; j < Direction::Length; ++j)
+				{
+					if (createFeature(x, y, static_cast<Direction>(j)))
+					{
+						lvl.exits.erase(lvl.exits.begin() + r);
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		void trimLevel()
+		{
+			auto& lvl = dMap[current];
+			int newHeight = lvl.height;
+			int newWidth = lvl.width;
+
+			// Trim left and right
+			for (int x = 0; x < newWidth; ++x)
+			{
+				bool empty = true;
+				for (int y = 0; y < newHeight; ++y)
+				{
+					if (GetTile(x, y) != Tile::Unused)
+					{
+						empty = false;
+						break;
+					}
+				}
+
+				if (empty)
+				{
+					auto start = lvl.tiles.begin() + x;
+					for (int y = 0; y < newHeight - 1; ++y)
+					{
+						start = lvl.tiles.erase(start);
+						start += newWidth - 1;
+					}
+					x--;
+					lvl.width = --newWidth;
+				}
+			}
+
+			// Trim above and below
+			for (int x = 0; x < newHeight; ++x)
+			{
+				bool empty = true;
+				for (int y = 0; y < newWidth; ++y)
+				{
+					if (GetTile(y, x) != Tile::Unused)
+					{
+						empty = false;
+						break;
+					}
+				}
+				if (empty)
+				{
+					auto start = lvl.tiles.begin() + (x * newWidth);
+					lvl.tiles.erase(start, start + newWidth);
+					x--;
+					lvl.height = --newHeight;
+				}
+			}
+		}
+
 	}
 
-	void trimLevel()
+	void SetStairs(DungeonID top, DungeonID bottom)
 	{
-		auto& lvl = dMap[current];
-		int newHeight = lvl.height;
-		int newWidth = lvl.width;
-
-		// Trim left and right
-		for (int x = 0; x < newWidth; ++x)
+		try
 		{
-			bool empty = true;
-			for (int y = 0; y < newHeight; ++y)
-			{
-				if (GetTile(x, y) != Tile::Unused)
-				{
-					empty = false;
-					break;
-				}
-			}
+			auto topLevel = dMap[top];
+			auto bottomLevel = dMap[bottom];
 
-			if (empty)
-			{
-				auto start = lvl.tiles.begin() + x;
-				for (int y = 0; y < newHeight - 1; ++y)
-				{
-					start = lvl.tiles.erase(start);
-					start += newWidth - 1;
-				}
-				x--;
-				lvl.width = --newWidth;
-			}
+			topLevel.down = bottom;
+			bottomLevel.up = top;
+
 		}
-
-		// Trim above and below
-		for (int x = 0; x < newHeight; ++x)
+		catch (const std::exception&)
 		{
-			bool empty = true;
-			for (int y = 0; y < newWidth; ++y)
-			{
-				if (GetTile(y, x) != Tile::Unused)
-				{
-					empty = false;
-					break;
-				}
-			}
-			if (empty)
-			{
-				auto start = lvl.tiles.begin() + (x * newWidth);
-				lvl.tiles.erase(start, start + newWidth);
-				x--;
-				lvl.height = --newHeight;
-			}
+			std::cout << "Couldn't connect the levels" << top << " and " << bottom << "\n";
 		}
 	}
 
-	void GenerateDungeonLevel(int width, int height, int maxFeatures)
+	void GenerateDungeonLevel(int width, int height, int maxFeatures, bool hasStairs)
 	{
 		last = current;
 		current = GenerateNewID();
 		dMap[current] = DungeonStruct(width, height);
 		auto& lvl = dMap[current];
+
+		SetStairs(last, current);
 
 		// place the first room in the center
 		if (!makeRoom(lvl.width / 2, lvl.height / 2, 
@@ -554,16 +652,19 @@ namespace Wanderer::Engine::Dungeon
 			}
 		}
 
-		if (!placeObject(Tile::UpStairs))
+		if (hasStairs)
 		{
-			std::cout << "Unable to place up stairs.\n";
-			return;
-		}
+			if (!placeObject(Tile::UpStairs))
+			{
+				std::cout << "Unable to place up stairs.\n";
+				return;
+			}
 
-		if (!placeObject(Tile::DownStairs))
-		{
-			std::cout << "Unable to place down stairs.\n";
-			return;
+			if (!placeObject(Tile::DownStairs))
+			{
+				std::cout << "Unable to place down stairs.\n";
+				return;
+			}
 		}
 
 		for (auto& tile : lvl.tiles)
@@ -579,9 +680,28 @@ namespace Wanderer::Engine::Dungeon
 		trimLevel();
 	}
 
+	void LoadLevel(DungeonID levelID)
+	{
+		try
+		{
+			dMap[levelID];
+		}
+		catch (const std::exception&)
+		{
+			std::cout << "Couldn't load level: " << levelID << std::endl;
+			return;
+
+		}
+
+		DeleteInstances();
+		last = current;
+		current = levelID;
+	}
+
 	void Print()
 	{
 		auto& lvl = dMap[current];
+		std::cout << "Level: " << current << "\n";
 		for (int y = 0; y < lvl.height; ++y)
 		{
 			for (int x = 0; x < lvl.width; ++x)

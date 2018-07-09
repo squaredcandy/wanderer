@@ -91,13 +91,41 @@ namespace Wanderer::Game
 									 Material::MAP_DIFFUSE);
 
 		// Dungeon
-		Dungeon::GenerateDungeonLevel(90, 90, 50);
-		auto lvl = Dungeon::GetCurrentLevel();
+		Dungeon::GenerateDungeonLevel(30, 30, 6);
 		Dungeon::Print();
-	
+
+		// Change this to set a mesh in dungeon.cpp and them work off them
+		// instead of actually passing in a reference everytime
+		// Put it in DungeonStruct so we can have different sets for different levels
+		// Maybe put the material in there as well so we can automate the rendering process
+		// Add a boolean in there or check for nullptr for checking if we need to draw something or not
+
 		Dungeon::AddFloorInstances(*plane);
 		Dungeon::AddWallInstances(*wall);
 		
+		Dungeon::AddArchInstances(*doorArch);
+		Dungeon::AddArchCapInstances(*doorCap);
+		Dungeon::AddGateInstances(*gate);
+
+		Dungeon::DeleteInstances();
+
+		Dungeon::GenerateDungeonLevel(30, 30, 6);
+		Dungeon::Print();
+
+		Dungeon::AddFloorInstances(*plane);
+		Dungeon::AddWallInstances(*wall);
+
+		Dungeon::AddArchInstances(*doorArch);
+		Dungeon::AddArchCapInstances(*doorCap);
+		Dungeon::AddGateInstances(*gate);
+
+		Dungeon::DeleteInstances();
+
+		Dungeon::LoadLevel(1);
+
+		Dungeon::AddFloorInstances(*plane);
+		Dungeon::AddWallInstances(*wall);
+
 		Dungeon::AddArchInstances(*doorArch);
 		Dungeon::AddArchCapInstances(*doorCap);
 		Dungeon::AddGateInstances(*gate);
@@ -110,7 +138,7 @@ int main(int argc, char ** argv)
 {
 	Engine::initFunction = Game::Init;
 	Engine::sceneFunction = Game::Scene::GameScene;
-	Engine::tickFunction = Game::Scene::tick;
+	Engine::tickFunction = Game::Scene::Tick;
 
 	Engine::InitializeEngine();
 	Engine::GameLoop();

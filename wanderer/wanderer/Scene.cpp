@@ -13,28 +13,24 @@ namespace Wanderer::Game::Scene
 
 	}
 
-	void tick()
+	void Tick()
 	{
-		auto lvl = Dungeon::GetCurrentLevel();
+		auto& lvl = Dungeon::GetCurrentLevel();
 
-		if (ImGui::IsKeyPressed(SDL_SCANCODE_G))
+		if (ImGui::IsKeyPressed(SDL_SCANCODE_G, false))
 		{
-			auto door = std::find(lvl.tiles.begin(), lvl.tiles.end(), Tile::ClosedDoor);
-			if (door != lvl.tiles.end())
+			auto found = std::find_if(lvl.gateTiles.begin(), lvl.gateTiles.end(), 
+									  [] (Tile * tile) 
 			{
-				*door = Tile::OpeningDoor;
-			}
-			
-		}
-		
-		auto found = std::find(lvl.tiles.begin(), lvl.tiles.end(), Tile::OpeningDoor);
-		if (found != lvl.tiles.end())
-		{
-			void * data = glMapNamedBufferRange(std::get<0>(lvl.vbos["Gate"]), 0, sizeof(glm::mat4), GL_MAP_WRITE_BIT);
+				return (*tile == Tile::ClosedDoor);
+			});
 
-			// attempt to convert to mat4
-			auto mData = *(glm::mat4*) data;
-			int i = 0;
+			if (found != lvl.gateTiles.end())
+			{
+				**found = Tile::OpeningDoor;
+			}
 		}
+
+		Dungeon::Tick();
 	}
 }

@@ -495,12 +495,12 @@ namespace Wanderer::Engine::Render
 		//auto archTex = Textures::GetMaterial(TEX_ARCH);
 		auto steelRustTex = Textures::GetMaterial(TEX_STEELRUST);
 
-		auto lvl = Dungeon::GetCurrentLevel();
-		auto wallCount = std::get<1>(lvl.vbos["Wall"]);
-		auto floorCount = std::get<1>(lvl.vbos["Floor"]);
-		auto doorArchCount = std::get<1>(lvl.vbos["DoorArch"]);
-		auto doorCapCount = std::get<1>(lvl.vbos["DoorArchCap"]);
-		auto gateCount = std::get<1>(lvl.vbos["Gate"]);
+		auto& lvl = Dungeon::GetCurrentLevel();
+		auto wallCount = std::get<1>(lvl.vbos[Dungeon::wallID]);
+		auto floorCount = std::get<1>(lvl.vbos[Dungeon::floorID]);
+		auto doorArchCount = std::get<1>(lvl.vbos[Dungeon::archID]);
+		auto doorCapCount = std::get<1>(lvl.vbos[Dungeon::archCapID]);
+		auto gateCount = std::get<1>(lvl.vbos[Dungeon::gateID]);
 
 		// Depth Test Function
 		glDepthFunc(GL_LESS);
@@ -527,12 +527,12 @@ namespace Wanderer::Engine::Render
 		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		static float i = 0;
-		i += ImGui::GetIO().DeltaTime / 10;
-		auto gateVBO = std::get<0>(lvl.vbos["Gate"]);
-		static glm::mat4 a;
-		a = glm::translate(a, glm::vec3(0, i, 0));
-		glNamedBufferSubData(gateVBO, 0, sizeof(glm::mat4), (GLvoid*) &a);
+		//static float i = 0;
+		//i += ImGui::GetIO().DeltaTime / 10;
+		//auto gateVBO = std::get<0>(lvl.vbos["Gate"]);
+		//static glm::mat4 a;
+		//a = glm::translate(a, glm::vec3(0, i, 0));
+		//glNamedBufferSubData(gateVBO, 0, sizeof(glm::mat4), (GLvoid*) &a);
 
 		glBindVertexArray(0);
 		glUseProgram(0);
