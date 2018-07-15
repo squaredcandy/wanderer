@@ -10,7 +10,7 @@ namespace Wanderer::Game::Scene
 	{
 		if (Engine::Flag::showDebugGraphWindow) UI::DebugGraphWindow();
 		if (Engine::Flag::showDebugWindow) UI::DebugWindow();
-
+		//bool a = true; ImGui::ShowDemoWindow(&a);
 	}
 
 	void Tick()
@@ -30,7 +30,8 @@ namespace Wanderer::Game::Scene
 				**found = Tile::OpeningDoor;
 			}
 		}
-
+		auto dt = ImGui::GetIO().DeltaTime;
+		Entities::Update(dt);
 		Dungeon::Tick();
 	}
 }

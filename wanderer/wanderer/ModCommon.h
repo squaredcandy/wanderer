@@ -7,9 +7,9 @@ using EntityID = std::size_t;
 class ModCommon : public Module
 {
 private:
-	std::string name;
 	EntityID targetID;
 public:
+	std::string name;
 	explicit ModCommon(std::string _name = "", EntityID _target = 0) : 
 		name(_name), targetID(_target)
 	{
@@ -30,6 +30,9 @@ public:
 
 	void GUI() override
 	{
-
+		if (ImGui::TreeNode("Common Module"))
+		{
+			ImGui::TreePop();
+		}
 	}
 };

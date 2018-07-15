@@ -22,7 +22,7 @@ private:
 	Transform transform;
 	Transform targetTransform;
 public:
-	ModTransform(glm::vec3 translation = { 0, 0, 0 },
+	ModTransform(glm::vec3 translation = { 0, 5, 0 },
 				 glm::vec3 rotation = { 0, 0, 0 },
 				 glm::vec3 scale = { 1, 1, 1 }) :
 		transform(translation, rotation, scale),
@@ -37,11 +37,14 @@ public:
 
 	void GUI() override
 	{
-
+		if (ImGui::TreeNode("Transform Module"))
+		{
+			ImGui::TreePop();
+		}
 	}
 
-	inline glm::vec3 GetTranslate() { return transform.translation; }
-	inline glm::vec3 GetRotate() { return transform.rotation; }
-	inline glm::vec3 GetScale() { return transform.scale; }
+	inline glm::vec3& GetTranslate() { return transform.translation; }
+	inline glm::vec3& GetRotate() { return transform.rotation; }
+	inline glm::vec3& GetScale() { return transform.scale; }
 
 };

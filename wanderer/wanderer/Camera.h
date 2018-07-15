@@ -15,6 +15,10 @@ struct CameraData
 	float fov;
 	float nearPlane;
 	float farPlane;
+	
+	// Distance from the camera in 
+	// which we don't update the light
+	float lightDistance;
 
 	float translateSpeed;
 	float rotateSpeed;
@@ -34,6 +38,7 @@ struct CameraData
 		fov = 45.f;
 		nearPlane = 0.1f;
 		farPlane = 1000000.f;
+		lightDistance = 100.f;
 		translateSpeed = 50;
 		rotateSpeed = 10;
 

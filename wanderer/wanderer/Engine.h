@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Entities.h"
 #include "Debug.h"
 #include "Font.h"
+#include "Entities.h"
 
 #include <functional>
 #include <memory>

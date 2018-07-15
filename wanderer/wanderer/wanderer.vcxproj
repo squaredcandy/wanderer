@@ -525,6 +525,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="ModLight.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="ModLightMod.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Mods.h" />
     <ClInclude Include="ModTransform.h">
       <SubType>
@@ -552,17 +560,34 @@
     <None Include="Data\Meshes\plane_export.FBX" />
     <None Include="Data\Meshes\sphere_export.FBX" />
     <None Include="Data\Meshes\wall_export.FBX" />
+    <None Include="Data\Shaders\background.frag" />
+    <None Include="Data\Shaders\background.vert" />
     <None Include="Data\Shaders\basic.frag" />
     <None Include="Data\Shaders\basic.vert" />
+    <None Include="Data\Shaders\brdf.frag" />
+    <None Include="Data\Shaders\brdf.vert" />
     <None Include="Data\Shaders\dungeon.frag" />
     <None Include="Data\Shaders\dungeon.vert" />
+    <None Include="Data\Shaders\equtocube.frag" />
+    <None Include="Data\Shaders\equtocube.vert" />
+    <None Include="Data\Shaders\irradiance.frag" />
+    <None Include="Data\Shaders\irradiance.vert" />
     <None Include="Data\Shaders\normal.frag" />
     <None Include="Data\Shaders\normal.geom" />
     <None Include="Data\Shaders\normal.tesc" />
     <None Include="Data\Shaders\normal.tese" />
     <None Include="Data\Shaders\normal.vert" />
+    <None Include="Data\Shaders\pbr.frag" />
+    <None Include="Data\Shaders\pbr.vert" />
+    <None Include="Data\Shaders\prefilter.frag" />
+    <None Include="Data\Shaders\prefilter.vert" />
+    <None Include="Data\Shaders\pshadow.frag" />
+    <None Include="Data\Shaders\pshadow.geom" />
+    <None Include="Data\Shaders\pshadow.vert" />
     <None Include="Data\Shaders\shadow.frag" />
     <None Include="Data\Shaders\shadow.vert" />
+    <None Include="Data\Shaders\sprite.frag" />
+    <None Include="Data\Shaders\sprite.vert" />
     <None Include="Data\Shaders\terrain.frag" />
     <None Include="Data\Shaders\terrain.geom" />
     <None Include="Data\Shaders\terrain.tesc" />
@@ -698,8 +723,23 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Data\Textures\arch_uv.png" />
+    <Image Include="Data\Textures\ibl_hdr_radiance.png" />
     <Image Include="Data\Textures\MedievalCobblestone2_1024_albedo.png" />
+    <Image Include="Data\Textures\MedievalCobblestone2_1024_ao.png" />
+    <Image Include="Data\Textures\MedievalCobblestone2_1024_height.png" />
+    <Image Include="Data\Textures\MedievalCobblestone2_1024_normal.png" />
+    <Image Include="Data\Textures\MedievalCobblestone2_1024_roughness.png" />
+    <Image Include="Data\Textures\SteelBattered_1K_albedo.png" />
+    <Image Include="Data\Textures\SteelBattered_1K_ao.png" />
+    <Image Include="Data\Textures\SteelBattered_1K_height.png" />
+    <Image Include="Data\Textures\SteelBattered_1K_metallic.png" />
+    <Image Include="Data\Textures\SteelBattered_1K_normal.png" />
+    <Image Include="Data\Textures\SteelBattered_1K_roughness.png" />
     <Image Include="Data\Textures\SteelRusted_1K_albedo.png" />
+    <Image Include="Data\Textures\SteelRusted_1K_ao.png" />
+    <Image Include="Data\Textures\SteelRusted_1K_metallic.png" />
+    <Image Include="Data\Textures\SteelRusted_1K_normal.png" />
+    <Image Include="Data\Textures\SteelRusted_1K_roughness.png" />
     <Image Include="Data\Textures\StoneWall_1024_albedo.png" />
     <Image Include="Data\Textures\StoneWall_1024_ao.png" />
     <Image Include="Data\Textures\StoneWall_1024_height.png" />

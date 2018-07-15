@@ -11,26 +11,33 @@
 #include "World.h"
 #include "Dungeon.h"
 
-const MeshID	MESH_SPHERE			= 00U;
-const MeshID	MESH_PLANE			= 01U;
-const MeshID	MESH_WALL			= 02U;
-const MeshID	MESH_DOORARCH		= 04U;
-const MeshID	MESH_GATE			= 05U;
-const MeshID	MESH_DOORCAP		= 06U;
+const MeshID	MESH_SPHERE			=  0U;
+const MeshID	MESH_FLOOR			=  1U;
+const MeshID	MESH_WALL			=  2U;
+const MeshID	MESH_DOORARCH		=  4U;
+const MeshID	MESH_GATE			=  5U;
+const MeshID	MESH_DOORCAP		=  6U;
+const MeshID	MESH_UPSTAIR		=  7U;
+const MeshID	MESH_DOWNSTAIR		=  8U;
+const MeshID	MESH_SPRITE			=  9U;
+									   
+// PBR Shaders
+const ShaderID	SHADER_PBR			=  1U;
+const ShaderID	SHADER_EQUTOCUBE	=  2U;
+const ShaderID	SHADER_IRRADIANCE	=  3U;
+const ShaderID	SHADER_PREFILTER	=  4U;
+const ShaderID	SHADER_BRDF			=  5U;
+const ShaderID	SHADER_BACKGROUND	=  6U;
 
-const ShaderID	SHADER_TERRAIN		= 00U;
-const ShaderID	SHADER_NORMAL		= 01U;
-const ShaderID	SHADER_BASIC		= 02U;
-const ShaderID	SHADER_SHADOW		= 03U;
-const ShaderID	SHADER_DUNGEON		= 04U;
+const ShaderID	SHADER_TERRAIN		=  7U;
+const ShaderID	SHADER_NORMAL		=  8U;
+const ShaderID	SHADER_BASIC		=  9U;
+const ShaderID	SHADER_SHADOW		= 10U;
+const ShaderID	SHADER_DUNGEON		= 11U;
+const ShaderID	SHADER_SPRITE		= 12U;
 
-const CameraID	CAMERA_PLAYER		= 00U;
 
-const TextureID TEX_TERRAIN_HEIGHT	= 00U;
-const TextureID TEX_STONEWALL		= 01U;
-const TextureID TEX_COBBLE			= 02U;
-const TextureID TEX_ARCH			= 03U;
-const TextureID TEX_STEELRUST		= 03U;
+const CameraID	CAMERA_PLAYER		=  0U;
 
 const int		CHUNK_LENGTH		= 1;
 
@@ -62,6 +69,8 @@ namespace Wanderer::Engine::Render
 
 	// Map to store the transparent objects
 	extern std::multimap<float, ModelInstance> transparentObjects;
+	
+	Buffer& GetBuffer(BufferID id);
 
 	void Cleanup();
 	void CheckFrameBufferStatus(std::string bufferName);
@@ -75,6 +84,8 @@ namespace Wanderer::Engine::Render
 	void BindTextureToFramebuffer(Buffer buffer, 
 								  ImVec2& size, 
 								  GLuint textureType);
+
+	void SetupCaptureBuffer(Buffer buffer, int size);
 	void BindDepthToFrameBuffer(Buffer buffer, ImVec2& size, bool multisampled);
 
 	void BeginFrameBufferDrawing(GLuint frameBuffer, ImVec2& size);
@@ -84,5 +95,15 @@ namespace Wanderer::Engine::Render
 	void EndFrameBufferDrawing(GLuint64 drawBuffer, ImVec2& size, ImVec2& pos);
 
 	void RenderWorld();
+	void RenderEnvMap(BufferID bufferID, int size,
+					  glm::mat4& captureProjection, 
+					  std::array<glm::mat4, 6>& captureViews);
+	void RenderIrradianceMap(BufferID bufferID, int size,
+							 glm::mat4& captureProjection, 
+							 std::array<glm::mat4, 6>& captureViews);
+	void RenderPrefilterMap(BufferID bufferID, int size,
+							glm::mat4& captureProjection,
+							std::array<glm::mat4, 6>& captureViews);
+	void RenderBRDF(int size);
 	void RenderDungeon();
 }

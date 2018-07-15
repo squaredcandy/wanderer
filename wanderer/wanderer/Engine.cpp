@@ -43,6 +43,7 @@ namespace Wanderer::Engine
 		// Enable alpha blending for textures
 		glEnable (GL_BLEND);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(GL_ONE, GL_ONE);
 
 		// Enable multisampling for our game
 		glEnable(GL_MULTISAMPLE);
@@ -64,6 +65,8 @@ namespace Wanderer::Engine
 		// 	glCullFace(GL_BACK);
 		glFrontFace(GL_CCW);
 		//glPatchParameteri(GL_PATCH_VERTICES, 3);
+
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 
 	void InitializeEngine()

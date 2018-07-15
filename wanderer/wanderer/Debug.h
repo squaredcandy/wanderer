@@ -3,6 +3,9 @@
 #include "Reflection.h"
 #include "Texture.h"
 #include "Camera.h"
+#include "Entities.h"
+#include "Dungeon.h"
+#include "Flags.h"
 
 #include <chrono>
 #include <array>
@@ -31,10 +34,11 @@ using DebugArray = std::array<float, DEBUG_LENGTH>;
 
 struct DebugData
 {
-	bool wireframe;
-	//bool drawArrays;
-	
+	int x, y;
 	float heightFactor;
+
+	float bias;
+	int samples;
 	
 	std::array<float, LOD_LENGTH> lodDist;
 	std::array<float, LOD_LENGTH> tesLevel;
@@ -52,8 +56,11 @@ struct DebugData
 
 	DebugData()
 	{
+		x = 0, y = 0;
+		bias = 2.f;
+		samples = 20;
 		//drawArrays = true;
-		heightFactor = 200;
+		heightFactor = 0;
 		
 		dLight.ambient = { 1.0f, 1.f, 1.f };
 		dLight.aIntensity = 0.5f;
@@ -82,7 +89,7 @@ namespace Wanderer::Engine::World
 
 namespace Wanderer::Engine::Debug
 {
-	extern DebugData debugData;
+	extern DebugData data;
 
 	extern int renderTimeIdx;
 	extern std::array<DebugArray, TIMER_LENGTH> debugTimers;

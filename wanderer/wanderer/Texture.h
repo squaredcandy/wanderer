@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <any>
 
 #include <GL/gl3w.h>
 #include <glm/glm.hpp>
@@ -15,12 +16,11 @@ struct Texture
 	int width;
 	int height;
 	int nrChannels;
-};
 
-struct AnimTexture : Texture
-{
-	bool animated;
-	int animWidth, animheight, animLength;
+	std::map<std::string, std::any> vars;
+
+	Texture() {};
+	virtual ~Texture() = default;
 };
 
 struct Material
@@ -30,9 +30,13 @@ struct Material
 		// Texture Maps
 		MAP_DIFFUSE,
 		MAP_NORMAL,
-		MAP_SPECULAR,
-		MAP_DISPLACEMENT,
+		MAP_METALLIC,
+		MAP_ROUGHNESS,
 		MAP_AO,
+
+		// Cubemap
+		MAP_CUBEMAP,
+		MAP_ENVMAP,
 
 		// World Maps
 		MAP_HEIGHT,
@@ -40,19 +44,36 @@ struct Material
 		// Anim Maps
 		MAP_DIFFUSE_ANIM
 	};
-	std::map<TextureType, std::unique_ptr<Texture>> textures;
+	std::map<TextureType, Texture> textures;
+
+	Material() {};
+	virtual ~Material() = default;
 };
 
-using TextureID = unsigned int;
+static std::map<Material::TextureType, std::string> texToString{
+	{Material::MAP_DIFFUSE,	     "Diffuse"},
+	{Material::MAP_NORMAL,	     "Normal"},
+	{Material::MAP_METALLIC,     "Metallic"},
+	{Material::MAP_ROUGHNESS,    "Roughness"},
+	{Material::MAP_AO,		     "AO"},
+	{Material::MAP_CUBEMAP,	     "Cubemap"},
+	{Material::MAP_ENVMAP,	     "Environment"},
+	{Material::MAP_HEIGHT,	     "Height"},
+	{Material::MAP_DIFFUSE_ANIM, "Diffuse Anim"}
+};
 
 struct Chunk;
 
 namespace Wanderer::Engine::Textures
 {
 	void Cleanup();
-	Material * CreateMaterial(TextureID id);
-	Material * GetMaterial(TextureID id);
-	void LoadStaticMaterial(TextureID id, std::string fileName, Material::TextureType texType);
-	//void LoadMaterial(TextureID id, std::string filename);
-	void LoadWorldMap(TextureID id, std::vector<float>& chunk, int size);
+	Material * CreateMaterial(std::string id);
+	Material * GetMaterial(std::string id);
+	std::map<std::string, Material>& GetAllMaterials();
+	void CreateEmptyMaterial(std::string id, Material::TextureType texType, GLuint rgbType, int size);
+	void LoadStaticMaterial(std::string id, std::string fileName, Material::TextureType texType);
+	void LoadHDREnvMap(std::string id, std::string filename);
+	void CreateEmptyCubemap(std::string id, int size,
+							GLuint minFilter, bool generateMips = false);
+	void LoadWorldMap(std::string id, std::vector<float>& chunk, int size);
 }

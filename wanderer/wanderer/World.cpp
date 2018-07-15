@@ -90,7 +90,7 @@ namespace Wanderer::Engine::World
 		for (auto& chunk : chunks)
 		{
 			GenerateMap(chunk, fnHeight);
-			Textures::LoadWorldMap(CHUNK_TERRAIN, chunk.chunk, chunkSize);
+			Textures::LoadWorldMap("Terrain", chunk.chunk, chunkSize);
 
 			std::vector<unsigned char> a;
 
@@ -98,7 +98,7 @@ namespace Wanderer::Engine::World
 
 			for (auto& val : chunk.chunk)
 			{
-				unsigned char b = val >= 0 ? val * 255 : 0;
+				unsigned char b = val >= 0 ? (unsigned char) val * 255 : (unsigned char) 0;
 				a.emplace_back(b);
 				a.emplace_back(b);
 				a.emplace_back(b);

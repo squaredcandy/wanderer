@@ -11,12 +11,6 @@ namespace Wanderer::Engine::Dungeon
 	DungeonID current;
 	std::map<DungeonID ,DungeonStruct> dMap;
 
-	const std::string archID = "DoorArch";
-	const std::string archCapID = "DoorArchCap";
-	const std::string gateID = "Gate";
-	const std::string floorID = "Floor";
-	const std::string wallID = "Wall";
-
 	DungeonID GenerateNewID()
 	{
 		static DungeonID lastID = 1;
@@ -44,7 +38,7 @@ namespace Wanderer::Engine::Dungeon
 		{
 			auto tile = GetTile(x, y);
 			return (tile == Tile::Floor ||
-					tile == Tile::DownStairs ||
+					//tile == Tile::DownStairs ||
 					tile == Tile::UpStairs ||
 					tile == Tile::OpenDoor ||
 					tile == Tile::ClosedDoor);
@@ -86,7 +80,7 @@ namespace Wanderer::Engine::Dungeon
 			{
 				if (*gateTile == Tile::OpeningDoor)
 				{
-					auto gateVBO = std::get<0>(lvl.vbos[gateID]);
+					auto gateVBO = lvl.models[TileID::Gate].ID;
 					auto gateUpdate = [=] (UPDATE_FUNC_ARGS)
 					{
 						auto mData = *(glm::mat4*) data;
@@ -112,13 +106,25 @@ namespace Wanderer::Engine::Dungeon
 		UpdateGates();
 	}
 
+	Mesh * GetModel(TileID modelID)
+	{
+		return Dungeon::GetCurrentLevel().models[modelID].mesh;
+	}
+
 	using ModelFunc = std::function<void(MODEL_FUNC_ARGS)>;
-	void AddInstances(Mesh& mesh, std::string vboName, ModelFunc modelFunction, GLuint draw)
+	void AddInstances(TileID tileID, ModelFunc modelFunction, GLuint draw)
 	{
 		GLuint vbo;
 		glm::mat4 model;
 		std::vector<glm::mat4> models;
 		auto& lvl = Dungeon::GetCurrentLevel();
+		Mesh * mesh = GetModel(tileID);
+		
+		if (mesh == nullptr)
+		{
+			std::cout << (int) tileID << " not set\n";
+			return;
+		}
 
 		for (int y = 0; y < lvl.height; ++y)
 		{
@@ -128,40 +134,58 @@ namespace Wanderer::Engine::Dungeon
 			}
 		}
 
+		if (models.empty())
+		{
+			return;
+		}
+
 		GLuint64 vec4Size = sizeof(glm::vec4);
 		GLuint mat4Size = sizeof(glm::mat4);
-		Meshes::CreateVBO(mesh.VAO, vbo, models.size() * mat4Size, &models[0], draw);
-		Meshes::AddInstancedAttribute(mesh.VAO, vbo, 5, 4, mat4Size, 0);
-		Meshes::AddInstancedAttribute(mesh.VAO, vbo, 6, 4, mat4Size, vec4Size);
-		Meshes::AddInstancedAttribute(mesh.VAO, vbo, 7, 4, mat4Size, vec4Size * 2);
-		Meshes::AddInstancedAttribute(mesh.VAO, vbo, 8, 4, mat4Size, vec4Size * 3);
+		Meshes::CreateVBO(mesh->VAO, vbo, models.size() * mat4Size, &models[0], draw);
+		Meshes::AddInstancedAttribute(mesh->VAO, vbo, 5, 4, mat4Size, 0);
+		Meshes::AddInstancedAttribute(mesh->VAO, vbo, 6, 4, mat4Size, vec4Size);
+		Meshes::AddInstancedAttribute(mesh->VAO, vbo, 7, 4, mat4Size, vec4Size * 2);
+		Meshes::AddInstancedAttribute(mesh->VAO, vbo, 8, 4, mat4Size, vec4Size * 3);
 
-		int i = 0;
-		while (lvl.vbos.find(vboName) != lvl.vbos.end())
-		{
-			if (isdigit(vboName.back())) vboName.pop_back();
-			vboName += std::to_string(i);
-		}
-		lvl.vbos[vboName] = { vbo, (GLuint) models.size() };
+		lvl.models[tileID].mesh = mesh;
+		lvl.models[tileID].ID = vbo;
+		lvl.models[tileID].length = (GLuint) models.size();
 	}
 
-	glm::mat4 InitialModelTranslation(glm::mat4 model, int& x, int& y, int& height, int& width, float heightOffset = 0)
+	glm::mat4 InitialModelTranslation(glm::mat4 model, int& x, int& y, 
+									  int& height, int& width, float heightOffset = 0)
 	{
 		return glm::translate(model,
 			glm::vec3((y * -10) + (height * 5), heightOffset, (x * 10) - (width * 5)));
 	}
 
+	void GenerateInstances()
+	{
+		auto& lvl = GetCurrentLevel();
+		for (auto& model : lvl.models)
+		{
+			instanceFunctionMap[model.first]();
+		}
+	}
+
 	void DeleteInstances()
 	{
 		auto& lvl = GetCurrentLevel();
-		for (auto& vbo : lvl.vbos)
+		for (auto& model : lvl.models)
 		{
-			glDeleteBuffers(1, &std::get<0>(vbo.second));
+			glDeleteBuffers(1, &model.second.ID);
+			model.second.length = 0;
 		}
-		lvl.vbos.clear();
+		lvl.gateTiles.clear();
 	}
 
-	void AddArchInstances(Mesh& mesh)
+	void SetMesh(TileID tile, Mesh * mesh, int level)
+	{
+		DungeonStruct& lvl = level == -1 ? GetCurrentLevel() : dMap[level];
+		lvl.models[tile].mesh = mesh;
+	}
+
+	void AddArchInstances()
 	{
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
@@ -181,10 +205,10 @@ namespace Wanderer::Engine::Dungeon
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, archID, modelFunction, GL_STATIC_DRAW);
+		AddInstances(TileID::Arch, modelFunction, GL_STATIC_DRAW);
 	}
 
-	void AddArchCapInstances(Mesh& mesh)
+	void AddArchCapInstances()
 	{
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
@@ -200,10 +224,10 @@ namespace Wanderer::Engine::Dungeon
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, archCapID, modelFunction, GL_STATIC_DRAW);
+		AddInstances(TileID::ArchCap, modelFunction, GL_STATIC_DRAW);
 	}
 
-	void AddGateInstances(Mesh& mesh)
+	void AddGateInstances()
 	{
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
@@ -232,10 +256,10 @@ namespace Wanderer::Engine::Dungeon
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, gateID, modelFunction, GL_DYNAMIC_DRAW);
+		AddInstances(TileID::Gate, modelFunction, GL_DYNAMIC_DRAW);
 	}
 
-	void AddFloorInstances(Mesh& mesh)
+	void AddFloorInstances()
 	{
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
@@ -246,10 +270,10 @@ namespace Wanderer::Engine::Dungeon
 				models.emplace_back(model);
 			}
 		};
-		AddInstances(mesh, floorID, modelFunction, GL_STATIC_DRAW);
+		AddInstances(TileID::Floor, modelFunction, GL_STATIC_DRAW);
 	}
 
-	void AddWallInstances(Mesh& mesh)
+	void AddWallInstances()
 	{
 		auto modelFunction = [] (MODEL_FUNC_ARGS)
 		{
@@ -285,7 +309,62 @@ namespace Wanderer::Engine::Dungeon
 				}
 			}
 		};
-		AddInstances(mesh, wallID, modelFunction, GL_STATIC_DRAW);
+		AddInstances(TileID::Wall, modelFunction, GL_STATIC_DRAW);
+	}
+
+	void AddDownstairInstances()
+	{
+		auto modelFunction = [] (MODEL_FUNC_ARGS)
+		{
+			if (GetTile(x, y) == Tile::DownStairs)
+			{
+				auto model = InitialModelTranslation(glm::mat4(), x, y, lvl.height, lvl.width, -10.f);
+				model = glm::rotate(model, glm::radians(90.f), glm::vec3(1, 0, 0));
+				models.emplace_back(model);
+			}
+		};
+		AddInstances(TileID::Downstairs, modelFunction, GL_STATIC_DRAW);
+	}
+
+	void AddUpstairInstances()
+	{
+		auto modelFunction = [] (MODEL_FUNC_ARGS)
+		{
+			if (GetTile(x,y) == Tile::UpStairs)
+			{
+				auto model = InitialModelTranslation(glm::mat4(), x, y, lvl.height, lvl.width);
+				model = glm::rotate(model, glm::radians(90.f), glm::vec3(1, 0, 0));
+				
+				// Check North
+				if (IsFloorTile(x, y - 1))
+				{
+					//model = glm::translate(model, glm::vec3(5.f, 0, 0));
+					models.emplace_back(model);
+				}
+				// Check East
+				else if (IsFloorTile(x + 1, y))
+				{
+ 					//model = glm::translate(model, glm::vec3(0, 0, 5.f));
+					model = glm::rotate(model, glm::radians(90.f), glm::vec3(0, 0, 1));
+ 					models.emplace_back(model);
+				}
+				// Check South
+				else if (IsFloorTile(x, y + 1))
+				{
+ 					//model = glm::translate(model, glm::vec3(-5.f, 0, 0));
+					model = glm::rotate(model, glm::radians(180.f), glm::vec3(0, 0, 1));
+ 					models.emplace_back(model);
+				}
+				// Check West
+				else if (IsFloorTile(x - 1, y))
+				{
+ 					//model = glm::translate(model, glm::vec3(0, 0, -5.f));
+					model = glm::rotate(model, glm::radians(-90.f), glm::vec3(0, 0, 1));
+ 					models.emplace_back(model);
+				}
+			}
+		};
+		AddInstances(TileID::Upstairs, modelFunction, GL_STATIC_DRAW);
 	}
 
 	namespace
@@ -318,6 +397,90 @@ namespace Wanderer::Engine::Dungeon
 			return false;
 		}
 
+		glm::ivec2 tileWith3Walls(Tile tile)
+		{
+			auto& lvl = dMap[current];
+			for (int i = 0; i < lvl.height; i++)
+			{
+				for (int j = 0; j < lvl.width; j++)
+				{
+					glm::ivec2 idx[4] =
+					{
+						{ i + 1, j },
+						{ i, j + 1 },
+						{ i - 1, j },
+						{ i, j - 1 },
+					};
+
+					int numWalls = 0;
+					for (auto & k : idx)
+					{
+						if (GetTile(k.x, k.y) == Tile::Wall)
+						{
+							numWalls++;
+						}
+					}
+
+					if (numWalls >= 3)
+					{
+						if (GetTile(i, j) == tile)
+						{
+							return { i, j };
+						}
+					}
+				}
+			}
+			return { -1, -1 };
+		}
+
+		bool placeObject(Tile tile, unsigned int settings, bool useCorridor = false)
+		{
+			auto& lvl = dMap[current];
+			auto& room = (settings |= ThreeWalls || useCorridor) ? lvl.corridors : lvl.rooms;
+
+			if (room.empty())
+				return false;
+
+			int r = Random::RandomInt((int) room.size()); // choose a random room
+			int x, y;
+			if (settings |= ThreeWalls)
+			{
+				if (Random::RandomBool() || true)
+				{
+					auto coords = tileWith3Walls((useCorridor) ? Tile::Corridor : Tile::Floor);
+					// We failed to find one
+					if (coords.x == -1 || coords.y == -1)
+					{
+						return false;
+					}
+					x = coords.x;
+					y = coords.y;
+				}
+			}
+			else
+			{
+				x = Random::RandomInt(room[r].x + 1, 
+									  room[r].x + room[r].z - 2);
+				y = Random::RandomInt(room[r].y + 1, 
+									  room[r].y + room[r].w - 2);
+			}
+
+			if (GetTile(x, y) == Tile::Floor || GetTile(x, y) == Tile::Corridor)
+			{
+				setTile(x, y, tile);
+
+				if (settings |= RemoveRoom)
+				{
+					// place one object in one room (optional)
+					room.erase(room.begin() + r);
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
 		bool placeRect(const glm::ivec4& rect, Tile tile)
 		{
 			auto& lvl = dMap[current];
@@ -325,13 +488,16 @@ namespace Wanderer::Engine::Dungeon
 				return false;
 
 			for (int y = rect.y; y < rect.y + rect.w; ++y)
+			{
 				for (int x = rect.x; x < rect.x + rect.z; ++x)
 				{
 					if (GetTile(x, y) != Tile::Unused)
 						return false; // the area already used
 				}
+			}
 
 			for (int y = rect.y - 1; y < rect.y + rect.w + 1; ++y)
+			{
 				for (int x = rect.x - 1; x < rect.x + rect.z + 1; ++x)
 				{
 					if (x == rect.x - 1 || y == rect.y - 1 || x == rect.x + rect.z || y == rect.y + rect.w)
@@ -339,7 +505,7 @@ namespace Wanderer::Engine::Dungeon
 					else
 						setTile(x, y, tile);
 				}
-
+			}
 			return true;
 		}
 
@@ -464,6 +630,7 @@ namespace Wanderer::Engine::Dungeon
 			if (placeRect(corridor, Tile::Corridor))
 			{
 				auto& lvl = dMap[current];
+				lvl.corridors.emplace_back(corridor);
 				if (dir != South && corridor.z != 1) // north side
 					lvl.exits.emplace_back(glm::ivec4{ corridor.x, corridor.y - 1, corridor.z, 1 });
 				if (dir != North && corridor.z != 1) // south side
@@ -605,7 +772,6 @@ namespace Wanderer::Engine::Dungeon
 				}
 			}
 		}
-
 	}
 
 	void SetStairs(DungeonID top, DungeonID bottom)
@@ -627,6 +793,11 @@ namespace Wanderer::Engine::Dungeon
 
 	void GenerateDungeonLevel(int width, int height, int maxFeatures, bool hasStairs)
 	{
+		if (current != UNSET_DUNGEONID)
+		{
+			DeleteInstances();
+		}
+
 		last = current;
 		current = GenerateNewID();
 		dMap[current] = DungeonStruct(width, height);
@@ -654,7 +825,7 @@ namespace Wanderer::Engine::Dungeon
 
 		if (hasStairs)
 		{
-			if (!placeObject(Tile::UpStairs))
+			if (!placeObject(Tile::UpStairs, ThreeWalls, true))
 			{
 				std::cout << "Unable to place up stairs.\n";
 				return;
@@ -690,12 +861,12 @@ namespace Wanderer::Engine::Dungeon
 		{
 			std::cout << "Couldn't load level: " << levelID << std::endl;
 			return;
-
 		}
 
 		DeleteInstances();
 		last = current;
 		current = levelID;
+		GenerateInstances();
 	}
 
 	void Print()
@@ -715,11 +886,10 @@ namespace Wanderer::Engine::Dungeon
 	{
 		for (auto const&[ID, dStruct] : dMap)
 		{
-			for (auto const & [str, vbo] : dStruct.vbos)
+			for (auto const & [str, vbo] : dStruct.models)
 			{
-				glDeleteBuffers(1, &std::get<0>(vbo));
+				glDeleteBuffers(1, &vbo.ID);
 			}
 		}
 	}
-
 }

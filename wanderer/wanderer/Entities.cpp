@@ -51,7 +51,7 @@ namespace Wanderer::Engine::Entities
 	Entity * Get(EntityID id) noexcept
 	{
 		auto found = std::find_if(std::begin(entities), std::end(entities),
-								  [=] (const std::unique_ptr<Entity> &e)
+								  [=] (const std::unique_ptr<Entity>& e)
 		{
 			return (e->GetID() == id);
 		});
@@ -60,5 +60,16 @@ namespace Wanderer::Engine::Entities
 			return (*found).get();
 		}
 		return nullptr;
+	}
+
+	std::vector<Entity*> GetAll()
+	{
+		std::vector<Entity*> found;
+		for (auto & entity : entities)
+		{
+			auto ptr = entity.get();
+			found.emplace_back(ptr);
+		}
+		return found;
 	}
 }

@@ -192,14 +192,15 @@ namespace Wanderer::Engine::Meshes
 	{
 		Assimp::Importer importer;
 		path.insert(0, "Data/Meshes/");
-		const aiScene * scene = importer.ReadFile(path,
-												  aiProcessPreset_TargetRealtime_MaxQuality);
-												  //aiProcess_Triangulate |
-												  //aiProcess_FlipUVs |
-												  //aiProcess_CalcTangentSpace |
-												  //aiProcess_OptimizeMeshes | 
-												  //aiProcess_OptimizeGraph | 
-												  //aiProcess_JoinIdenticalVertices);
+		const aiScene * scene = 
+			importer.ReadFile(path, 
+							  //aiProcessPreset_TargetRealtime_MaxQuality);
+							  aiProcess_Triangulate |
+							  //aiProcess_FlipUVs |
+							  aiProcess_CalcTangentSpace |
+							  aiProcess_OptimizeMeshes | 
+							  aiProcess_OptimizeGraph | 
+							  aiProcess_JoinIdenticalVertices);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || 
 			!scene->mRootNode)
 		{
@@ -227,5 +228,4 @@ namespace Wanderer::Engine::Meshes
 		if (meshes.find(key) == meshes.end()) return nullptr;
 		return &meshes[key];
 	}
-
 }

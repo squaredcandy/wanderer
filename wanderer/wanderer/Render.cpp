@@ -2,7 +2,9 @@
 
 namespace Wanderer::Engine::Render
 {
-	GLuint sampleSize = 4;
+	const int MAX_LIGHTS = 32;
+
+	GLuint sampleSize = 1;
 
 	std::map<BufferID, Buffer> buffers;
 
@@ -12,6 +14,119 @@ namespace Wanderer::Engine::Render
 
 	std::vector<ModelInstance> opaqueObjects;
 	std::multimap<float, ModelInstance> transparentObjects;
+
+	void RenderCube()
+	{
+		static unsigned int cubeVAO = 0;
+		static unsigned int cubeVBO = 0;
+		// initialize (if necessary)
+		if (cubeVAO == 0)
+		{
+			float vertices[] = {
+				// back face
+				-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+				1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+				1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+				1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+				-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+				-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, // top-left
+				// front face
+				-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+				1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bottom-right
+				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+				-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // top-left
+				-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+				// left face
+				-1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+				-1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-left
+				-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+				-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+				-1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+				-1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+				// right face
+				1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+				1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+				1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right         
+				1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+				1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+				1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left     
+				// bottom face
+				-1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+				1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top-left
+				1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+				1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+				-1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+				-1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+				// top face
+				-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+				1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+				1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right     
+				1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+				-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+				-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f  // bottom-left
+			};
+			glGenVertexArrays(1, &cubeVAO);
+			glGenBuffers(1, &cubeVBO);
+			// fill buffer
+			glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+			// link vertex attributes
+			glBindVertexArray(cubeVAO);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (3 * sizeof(float)));
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (6 * sizeof(float)));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+		}
+		// render Cube
+		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+
+		//glDeleteVertexArrays(1, &cubeVAO);
+		//glDeleteBuffers(1, &cubeVBO);
+	}
+
+	void RenderQuad()
+	{
+		static unsigned int quadVAO = 0;
+		static unsigned int quadVBO = 0;
+		if (quadVAO == 0)
+		{
+			float quadVertices[] = {
+				// positions        // texture Coords
+				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+			};
+			// setup plane VAO
+			glGenVertexArrays(1, &quadVAO);
+			glGenBuffers(1, &quadVBO);
+			glBindVertexArray(quadVAO);
+			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) 0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+		}
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+
+		//glDeleteVertexArrays(1, &quadVAO);
+		//glDeleteBuffers(1, &quadVBO);
+	}
+
+	Buffer& GetBuffer(BufferID id)
+	{
+		return buffers[id];
+	}
 
 	void Cleanup()
 	{
@@ -97,6 +212,19 @@ namespace Wanderer::Engine::Render
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void SetupCaptureBuffer(Buffer buffer,
+								 int size)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, buffer.frame);
+		glBindRenderbuffer(GL_RENDERBUFFER, buffer.depth);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 
+								  GL_RENDERBUFFER, buffer.depth);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		CheckFrameBufferStatus("CAPTUREBUFFER");
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
 	void BindDepthToFrameBuffer(Buffer buffer, ImVec2& size, bool multisampled)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, buffer.frame);
@@ -119,7 +247,7 @@ namespace Wanderer::Engine::Render
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void BindShadowToFrameBuffer(Buffer buffer, ImVec2& size, GLuint textureType)
+	void BindDirectionShadowToFrameBuffer(Buffer buffer, ImVec2& size, GLuint textureType)
 	{
 		std::string bufferName;
 		glBindFramebuffer(GL_FRAMEBUFFER, buffer.frame);
@@ -160,7 +288,9 @@ namespace Wanderer::Engine::Render
 		glViewport(0, 0, (GLint) size.x, (GLint) size.y);
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 		// Move this to the camera
-		ImVec4 clear_col = ImColor(15, 94, 156);
+		ImVec4 clear_col;
+		if (Flag::debugMode) clear_col = ImColor(15, 94, 156);
+		else clear_col = ImColor();
 		glClearColor(clear_col.x, clear_col.y, clear_col.z, clear_col.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
@@ -241,13 +371,13 @@ namespace Wanderer::Engine::Render
 		Buffer msaaBuffer = buffers[msaaBufferID];
 		Buffer shdwBuffer = buffers[shdwBufferID];
 
-		BindShadowToFrameBuffer(shdwBuffer, size, GL_TEXTURE_2D);
+		BindDirectionShadowToFrameBuffer(shdwBuffer, size, GL_TEXTURE_2D);
 		BeginFrameBufferDrawing(shdwBuffer.frame, size);
 
 		float nearPlane = 1.f, farPlane = 7.5f;
 		glm::mat4 lightProjection = glm::ortho(-10.f, 10.f, -10.f, 10.f, nearPlane, farPlane);
 
-		auto dir = Debug::debugData.dLight.direction * glm::vec3(500);
+		auto dir = Debug::data.dLight.direction * glm::vec3(500);
 		auto a = dir.y;
 		dir.y = dir.z;
 		dir.z = a;
@@ -265,19 +395,19 @@ namespace Wanderer::Engine::Render
 		{
 			using namespace Debug;
 			Shaders::SetVec3("Wld_Eye_Pos", Camera::GetCameraPosition());
-			Shaders::SetFloat("lodDistance", debugData.lodDist.data(), LOD_LENGTH);
-			Shaders::SetFloat("tesLevels", debugData.tesLevel.data(), LOD_LENGTH);
-			Shaders::SetFloat("heightFactor", debugData.heightFactor);
+			Shaders::SetFloat("lodDistance", data.lodDist.data(), LOD_LENGTH);
+			Shaders::SetFloat("tesLevels", data.tesLevel.data(), LOD_LENGTH);
+			Shaders::SetFloat("heightFactor", data.heightFactor);
 		}
 
 		Shaders::SetInt("heightNoise", 0);
 
-		auto heightmap = Textures::GetMaterial(CHUNK_TERRAIN);
+		auto heightmap = Textures::GetMaterial("Terrain");
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, heightmap->textures[Material::MAP_HEIGHT]->textureID);
+		glBindTexture(GL_TEXTURE_2D, heightmap->textures[Material::MAP_HEIGHT].textureID);
 
-		auto planeMesh = Meshes::GetModel(MESH_PLANE);
+		auto planeMesh = Meshes::GetModel(MESH_FLOOR);
 		glBindVertexArray(planeMesh->VAO);
 
 		glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(3,0,0));
@@ -330,16 +460,16 @@ namespace Wanderer::Engine::Render
  		{
  			using namespace Debug;
  			Shaders::SetVec3("Wld_Eye_Pos", Camera::GetCameraPosition());
- 			Shaders::SetFloat("heightFactor", debugData.heightFactor);
- 			Shaders::SetFloat("lodDistance", debugData.lodDist.data(), LOD_LENGTH);
- 			Shaders::SetFloat("tesLevels", debugData.tesLevel.data(), LOD_LENGTH);
+ 			Shaders::SetFloat("heightFactor", data.heightFactor);
+ 			Shaders::SetFloat("lodDistance", data.lodDist.data(), LOD_LENGTH);
+ 			Shaders::SetFloat("tesLevels", data.tesLevel.data(), LOD_LENGTH);
  
- 			Shaders::SetVec3("dLight.ambient", debugData.dLight.ambient);
- 			Shaders::SetFloat("dLight.aIntensity", debugData.dLight.aIntensity);
+ 			Shaders::SetVec3("dLight.ambient", data.dLight.ambient);
+ 			Shaders::SetFloat("dLight.aIntensity", data.dLight.aIntensity);
  
  			Shaders::SetVec3("dLight.direction", 
- 							 glm::normalize(debugData.dLight.direction));
- 			Shaders::SetFloat("dLight.dIntensity", debugData.dLight.dIntensity);
+ 							 glm::normalize(data.dLight.direction));
+ 			Shaders::SetFloat("dLight.dIntensity", data.dLight.dIntensity);
  
  			Shaders::SetInt("chunkSize", World::chunkSize);
  			Shaders::SetBool("drawGridLines", World::drawGridLines);
@@ -353,7 +483,7 @@ namespace Wanderer::Engine::Render
  		//auto heightmap = Textures::GetMaterial(CHUNK_TERRAIN);
  
  		glActiveTexture(GL_TEXTURE0);
- 		glBindTexture(GL_TEXTURE_2D, heightmap->textures[Material::MAP_HEIGHT]->textureID);
+ 		glBindTexture(GL_TEXTURE_2D, heightmap->textures[Material::MAP_HEIGHT].textureID);
  
  		model = glm::translate(glm::mat4(), glm::vec3(3,0,0));
  		model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
@@ -375,9 +505,9 @@ namespace Wanderer::Engine::Render
  		//{
  		//	using namespace Debug;
  		//	Shaders::SetVec3("Wld_Eye_Pos", Camera::GetCameraPosition());
- 		//	Shaders::SetFloat("heightFactor", debugData.heightFactor);
- 		//	Shaders::SetFloat("lodDistance", debugData.lodDist.data(), LOD_LENGTH);
- 		//	Shaders::SetFloat("tesLevels", debugData.tesLevel.data(), LOD_LENGTH);
+ 		//	Shaders::SetFloat("heightFactor", data.heightFactor);
+ 		//	Shaders::SetFloat("lodDistance", data.lodDist.data(), LOD_LENGTH);
+ 		//	Shaders::SetFloat("tesLevels", data.tesLevel.data(), LOD_LENGTH);
  		//}
  		//
  		//Shaders::SetInt("heightNoise", 0);
@@ -394,8 +524,8 @@ namespace Wanderer::Engine::Render
  		Shaders::SetMat4("Projection", projection);
  		Shaders::SetMat4("View", view);
  
- 		//auto dir = glm::normalize(Debug::debugData.dLight.direction) * glm::vec3(500);
- 		//auto dir = Debug::debugData.dLight.direction * glm::vec3(500);
+ 		//auto dir = glm::normalize(Debug::data.dLight.direction) * glm::vec3(500);
+ 		//auto dir = Debug::data.dLight.direction * glm::vec3(500);
  		//auto a = dir.y;
  		//dir.y = dir.z;
  		//dir.z = a;
@@ -424,10 +554,132 @@ namespace Wanderer::Engine::Render
 		ImGui::PopStyleVar();
 	}
 
-	void SetTexture(int texID, Material * mat, Material::TextureType texType)
+	void RenderEnvMap(BufferID bufferID, int size, 
+					  glm::mat4& captureProjection, 
+					  std::array<glm::mat4, 6>& captureViews)
+	{
+		// Change Depth Function
+		glDepthFunc(GL_LEQUAL);
+
+		auto currentShader = SHADER_EQUTOCUBE;
+		auto capture = Textures::GetMaterial("Capture");
+		auto buffer = buffers[bufferID];
+
+		Shaders::SetCurrentShader(currentShader);
+		Shaders::SetInt("equirectangularMap", 0);
+		Shaders::SetMat4("projection", captureProjection);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, capture->textures[Material::MAP_ENVMAP].textureID);
+
+		glViewport(0, 0, size, size);
+		glBindFramebuffer(GL_FRAMEBUFFER, buffer.frame);
+		// Render each side
+		for (auto i = 0; i < 6; ++i)
+		{
+			Shaders::SetMat4("view", captureViews[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
+								   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+								   capture->textures[Material::MAP_CUBEMAP].textureID, 0);
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			RenderCube();
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Generate Cubemap Mipmaps
+		glBindTexture(GL_TEXTURE_CUBE_MAP, capture->textures[Material::MAP_CUBEMAP].textureID);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	}
+
+	void RenderIrradianceMap(BufferID bufferID, int size,
+							 glm::mat4& captureProjection, 
+							 std::array<glm::mat4, 6>& captureViews)
+	{
+		auto currentShader = SHADER_IRRADIANCE;
+		auto capture = Textures::GetMaterial("Capture");
+		auto irradiance = Textures::GetMaterial("Irradiance");
+		auto buffer = buffers[bufferID];
+
+		Shaders::SetCurrentShader(currentShader);
+		Shaders::SetInt("environmentMap", 0);
+		Shaders::SetMat4("projection", captureProjection);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, capture->textures[Material::MAP_CUBEMAP].textureID);
+
+		glViewport(0, 0, size, size); 
+		glBindFramebuffer(GL_FRAMEBUFFER, buffer.frame);
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			Shaders::SetMat4("view", captureViews[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+								   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+								   irradiance->textures[Material::MAP_CUBEMAP].textureID, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			RenderCube();
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void RenderPrefilterMap(BufferID bufferID, int size,
+							glm::mat4& captureProjection,
+							std::array<glm::mat4, 6>& captureViews)
+	{
+		auto currentShader = SHADER_PREFILTER;
+		auto capture = Textures::GetMaterial("Capture");
+		auto prefilter = Textures::GetMaterial("Prefilter");
+		auto buffer = buffers[bufferID];
+
+		Shaders::SetCurrentShader(currentShader);
+		Shaders::SetInt("environmentMap", 0);
+		Shaders::SetMat4("projection", captureProjection);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, capture->textures[Material::MAP_CUBEMAP].textureID);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, buffer.frame);
+		unsigned int maxMipLevels = 5;
+		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+		{
+			// reisze framebuffer according to mip-level size.
+			auto mipWidth = (unsigned int)(128.0 * std::pow(0.5, mip));
+			auto mipHeight = (unsigned int)(128.0 * std::pow(0.5, mip));
+			glBindRenderbuffer(GL_RENDERBUFFER, buffer.depth);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+			glViewport(0, 0, mipWidth, mipHeight);
+
+			float roughness = (float) mip / (float) (maxMipLevels - 1);
+			Shaders::SetFloat("roughness", roughness);
+			for (unsigned int i = 0; i < 6; ++i)
+			{
+				Shaders::SetMat4("view", captureViews[i]);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+									   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+									   prefilter->textures[Material::MAP_CUBEMAP].textureID, 0);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				RenderCube();
+			}
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void RenderBRDF(int size)
+	{
+		auto currentShader = SHADER_BRDF;
+		Shaders::SetCurrentShader(currentShader);
+
+		glViewport(0, 0, size, size);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		RenderQuad();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void SetTexture(int texID, GLuint glTexType, Material * mat, Material::TextureType texType)
 	{
 		glActiveTexture(GL_TEXTURE0 + texID);
-		glBindTexture(GL_TEXTURE_2D, mat->textures[texType]->textureID);
+		glBindTexture(glTexType, mat->textures[texType].textureID);
 	}
 
 	void DrawModel(Mesh * mesh, GLint indices = 0)
@@ -446,6 +698,76 @@ namespace Wanderer::Engine::Render
 		}
 	}
 
+	void DrawModel(DungeonModelData& model)
+	{
+		if (model.length == 0) return;
+		glBindVertexArray(model.mesh->VAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.mesh->EBO);
+		glDrawElementsInstanced(GL_TRIANGLES, (GLuint) model.mesh->indices.size(), 
+								GL_UNSIGNED_INT, (GLvoid*) nullptr, model.length);
+	}
+
+	void RenderShadows(CameraData& camera, Entity * light)
+	{
+		glClearColor(0.1f, 0.1f, 0.1f, 1.f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		auto& l = light->GetMod<ModLight>();
+		if (!l.drawLight || glm::distance(camera.translation, 
+				light->GetTransform().GetTranslate()) > camera.lightDistance)
+		{
+			return;
+		}
+		//glm::vec2 size{ 1024, 1024 };
+		glm::mat4 shadowProjection = glm::perspective(glm::radians(90.f), 
+													   l.GetSize() / l.GetSize(),
+													  camera.nearPlane, 
+													  250.f);
+		glm::vec3 lightPos = light->GetTransform().GetTranslate();
+		std::vector<glm::mat4> shadowTransforms
+		{
+			shadowProjection * glm::lookAt(lightPos, lightPos + 
+			glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+			shadowProjection * glm::lookAt(lightPos, lightPos + 
+			glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+			shadowProjection * glm::lookAt(lightPos, lightPos + 
+			glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+			shadowProjection * glm::lookAt(lightPos, lightPos + 
+			glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+			shadowProjection * glm::lookAt(lightPos, lightPos + 
+			glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+			shadowProjection * glm::lookAt(lightPos, lightPos + 
+			glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
+		};
+		glDisable(GL_CULL_FACE);
+		glViewport(0, 0, (int) l.GetSize(), (int) l.GetSize());
+		glBindFramebuffer(GL_FRAMEBUFFER, l.frameBuffer);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		Shaders::SetCurrentShader(SHADER_SHADOW);
+		for (unsigned int i = 0; i < shadowTransforms.size(); ++i)
+		{
+			Shaders::SetMat4("shadowMatrices[" + std::to_string(i) + "]", 
+							 shadowTransforms[i]);
+		}
+		Shaders::SetFloat("far_plane", l.GetDistance());
+		Shaders::SetVec3("lightPos", lightPos);
+
+		// Render Scene
+		auto& lvl = Dungeon::GetCurrentLevel();
+		DrawModel(lvl.models[TileID::Floor]);
+		DrawModel(lvl.models[TileID::Upstairs]);
+		DrawModel(lvl.models[TileID::Downstairs]);
+
+		DrawModel(lvl.models[TileID::Wall]);
+		DrawModel(lvl.models[TileID::Arch]);
+		DrawModel(lvl.models[TileID::ArchCap]);
+
+		DrawModel(lvl.models[TileID::Gate]);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_CULL_FACE);
+	}
+
 	void RenderDungeon()
 	{
 		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiSetCond_FirstUseEver);
@@ -457,9 +779,17 @@ namespace Wanderer::Engine::Render
 
 		CameraControls(pos, size);
 
+		// Render Shadows
+		Camera::UpdateCameraVectors();
+
+		auto lights = Entities::GetAll<ModLight>();
+		for (auto light : lights)
+		{
+			RenderShadows(Camera::GetCamera(), light);
+		}
+
 		Buffer drawBuffer = buffers[drawBufferID];
 		Buffer msaaBuffer = buffers[msaaBufferID];
-		//Buffer shdwBuffer = buffers[shdwBufferID];
 
 		// Bind Draw and MSAA buffers
 		{
@@ -479,60 +809,123 @@ namespace Wanderer::Engine::Render
 		}
 
 		// Update Camera matrices
-		Camera::UpdateCameraVectors();
 		glm::mat4 projection = Camera::GetProjectionMatrix(size);
 		glm::mat4 view = Camera::GetViewMatrix();
+		glm::vec3 camPos = Camera::GetCameraPosition();
 
-		// Bind Mesh vao
-		auto floorMesh = Meshes::GetModel(MESH_PLANE);
-		auto wallMesh = Meshes::GetModel(MESH_WALL);
-		auto doorArchMesh = Meshes::GetModel(MESH_DOORARCH);
-		auto doorCapMesh = Meshes::GetModel(MESH_DOORCAP);
-		auto gateMesh = Meshes::GetModel(MESH_GATE);
+		// IBL data
+// 		auto capture = Textures::GetMaterial(TEX_CAPTURE);
+// 		auto irradiance = Textures::GetMaterial(TEX_IRRADIANCE);
+// 		auto prefilter = Textures::GetMaterial(TEX_PREFILTER);
 
-		auto wallTex = Textures::GetMaterial(TEX_STONEWALL);
-		auto floorTex = Textures::GetMaterial(TEX_COBBLE);
-		//auto archTex = Textures::GetMaterial(TEX_ARCH);
-		auto steelRustTex = Textures::GetMaterial(TEX_STEELRUST);
+		// Textures
+		auto wallTex = Textures::GetMaterial("Stonewall");
+		auto floorTex = Textures::GetMaterial("Cobble2");
+		auto gateTex = Textures::GetMaterial("SteelBattered");
+		auto slashTex = Textures::GetMaterial("Slash");
 
 		auto& lvl = Dungeon::GetCurrentLevel();
-		auto wallCount = std::get<1>(lvl.vbos[Dungeon::wallID]);
-		auto floorCount = std::get<1>(lvl.vbos[Dungeon::floorID]);
-		auto doorArchCount = std::get<1>(lvl.vbos[Dungeon::archID]);
-		auto doorCapCount = std::get<1>(lvl.vbos[Dungeon::archCapID]);
-		auto gateCount = std::get<1>(lvl.vbos[Dungeon::gateID]);
 
 		// Depth Test Function
-		glDepthFunc(GL_LESS);
-
+ 		glDepthFunc(GL_LESS);
+ 
 		// Bind Current Shader
-		auto currentShader = SHADER_DUNGEON;
-		Shaders::SetCurrentShader(currentShader);
+		Shaders::SetCurrentShader(SHADER_PBR);
 
+		Shaders::SetMat4("projection", projection);
+		Shaders::SetMat4("view", view);
+		Shaders::SetVec3("camPos", camPos);
+
+		//Shaders::SetFloat("heightScale", Debug::data.heightFactor);
+
+		int i = 0;
+		for (auto& light : lights)
+		{
+			auto& mod = light->GetMod<ModLight>();
+			if (!mod.drawLight)continue;
+			std::string idx = "[" + std::to_string(i) + "]";
+			Shaders::SetVec3("lightPositions" + idx, light->GetTransform().GetTranslate());
+			Shaders::SetVec3("lightColors" + idx, mod.color);
+			Shaders::SetFloat("far_plane" + idx, mod.GetDistance());
+			glActiveTexture(GL_TEXTURE9 + i);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, mod.cubemapID);
+			if (++i > MAX_LIGHTS) break;
+		}
+		Shaders::SetInt("lightLength", i);
+		Shaders::SetFloat("bias", Debug::data.bias);
+		Shaders::SetInt("samples", Debug::data.samples);
+
+// 		SetTexture(0, GL_TEXTURE_CUBE_MAP, irradiance, Material::MAP_CUBEMAP);
+// 		SetTexture(1, GL_TEXTURE_CUBE_MAP, prefilter, Material::MAP_CUBEMAP);
+// 		SetTexture(2, GL_TEXTURE_2D, prefilter, Material::MAP_DIFFUSE);
+
+		SetTexture(3, GL_TEXTURE_2D, floorTex, Material::MAP_DIFFUSE);
+		SetTexture(4, GL_TEXTURE_2D, floorTex, Material::MAP_NORMAL);
+		SetTexture(5, GL_TEXTURE_2D, floorTex, Material::MAP_METALLIC);
+		SetTexture(6, GL_TEXTURE_2D, floorTex, Material::MAP_ROUGHNESS);
+		SetTexture(7, GL_TEXTURE_2D, floorTex, Material::MAP_AO);
+		SetTexture(8, GL_TEXTURE_2D, floorTex, Material::MAP_HEIGHT);
+		DrawModel(lvl.models[TileID::Floor]);
+		DrawModel(lvl.models[TileID::Upstairs]);
+		DrawModel(lvl.models[TileID::Downstairs]);
+
+		SetTexture(3, GL_TEXTURE_2D, wallTex, Material::MAP_DIFFUSE);
+		SetTexture(4, GL_TEXTURE_2D, wallTex, Material::MAP_NORMAL);
+		SetTexture(5, GL_TEXTURE_2D, wallTex, Material::MAP_METALLIC);
+		SetTexture(6, GL_TEXTURE_2D, wallTex, Material::MAP_ROUGHNESS);
+		SetTexture(7, GL_TEXTURE_2D, wallTex, Material::MAP_AO);
+		SetTexture(8, GL_TEXTURE_2D, wallTex, Material::MAP_HEIGHT);
+		DrawModel(lvl.models[TileID::Wall]);
+		DrawModel(lvl.models[TileID::Arch]);
+		DrawModel(lvl.models[TileID::ArchCap]);
+
+		SetTexture(3, GL_TEXTURE_2D, gateTex, Material::MAP_DIFFUSE);
+		SetTexture(4, GL_TEXTURE_2D, gateTex, Material::MAP_NORMAL);
+		SetTexture(5, GL_TEXTURE_2D, gateTex, Material::MAP_METALLIC);
+		SetTexture(6, GL_TEXTURE_2D, gateTex, Material::MAP_ROUGHNESS);
+		SetTexture(7, GL_TEXTURE_2D, gateTex, Material::MAP_AO);
+		SetTexture(8, GL_TEXTURE_2D, gateTex, Material::MAP_HEIGHT);
+		DrawModel(lvl.models[TileID::Gate]);
+
+		if (Flag::debugMode)
+		{
+			Shaders::SetCurrentShader(SHADER_BASIC);
+			Shaders::SetMat4("Projection", projection);
+			Shaders::SetMat4("View", view);
+
+			for (auto& light : lights)
+			{
+				auto position = light->GetTransform().GetTranslate();
+				auto& mod = light->GetMod<ModLight>();
+				auto model = glm::translate(glm::mat4(), position);
+				model = glm::scale(model, glm::vec3(0.1f));
+
+				Shaders::SetMat4("Model", model);
+				Shaders::SetVec3("Color", mod.color);
+				auto sphere = Meshes::GetModel(MESH_SPHERE);
+				DrawModel(sphere);
+			}
+		}
+
+		glDisable(GL_CULL_FACE);
+		Shaders::SetCurrentShader(SHADER_SPRITE);
+		Shaders::SetInt("sprite", 0);
+		Shaders::SetFloat("width", 4);
+		Shaders::SetFloat("height", 4);
+		Shaders::SetInt("x", Debug::data.x);
+		Shaders::SetInt("y", Debug::data.y);
 		Shaders::SetMat4("Projection", projection);
 		Shaders::SetMat4("View", view);
-		
-		Shaders::SetInt("textureSample", 0);
+		auto model = glm::translate(glm::mat4(), glm::vec3(5,5,5));
+		model = glm::scale(model, glm::vec3(1.77f, 1, 1));
+		model = glm::scale(model, glm::vec3(0.5f));
+		Shaders::SetMat4("Model", model);
+		SetTexture(0, GL_TEXTURE_2D, slashTex, Material::MAP_DIFFUSE);
+		auto plane = Meshes::GetModel(MESH_SPRITE);
+		DrawModel(plane);
+		glEnable(GL_CULL_FACE);
 
-		SetTexture(0, floorTex, Material::MAP_DIFFUSE);
-		DrawModel(floorMesh, floorCount);
-
-		SetTexture(0, wallTex, Material::MAP_DIFFUSE);
-		DrawModel(wallMesh, wallCount);
-		DrawModel(doorArchMesh, doorArchCount);
-		DrawModel(doorCapMesh, doorCapCount);
-
-		SetTexture(0, steelRustTex, Material::MAP_DIFFUSE);
-		DrawModel(gateMesh, gateCount);
-		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		//static float i = 0;
-		//i += ImGui::GetIO().DeltaTime / 10;
-		//auto gateVBO = std::get<0>(lvl.vbos["Gate"]);
-		//static glm::mat4 a;
-		//a = glm::translate(a, glm::vec3(0, i, 0));
-		//glNamedBufferSubData(gateVBO, 0, sizeof(glm::mat4), (GLvoid*) &a);
 
 		glBindVertexArray(0);
 		glUseProgram(0);

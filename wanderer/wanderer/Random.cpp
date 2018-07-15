@@ -17,6 +17,18 @@ namespace Wanderer::Engine::Random
 		return dist(mt) + min;
 	}
 
+	float RandomFloat(float exclusiveMax)
+	{
+		std::uniform_real_distribution<> dist(0, exclusiveMax - 1.f);
+		return (float)dist(mt);
+	}
+
+	float RandomFloat(float min, float max)
+	{
+		std::uniform_real_distribution<> dist(0, max - min);
+		return (float)dist(mt) + min;
+	}
+
 	bool RandomBool(double probability)
 	{
 		std::bernoulli_distribution dist(probability);

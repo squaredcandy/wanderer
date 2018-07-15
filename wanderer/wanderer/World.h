@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <FastNoise/FastNoise.h>
 
-const TextureID CHUNK_TERRAIN = 0;
+//const std::string CHUNK_TERRAIN = 0;
 
 struct Chunk
 {

@@ -34,7 +34,9 @@ public:
 
 	void GUI()
 	{
+		ImGui::PushID((int)id);
 		for (auto& m : modules) m->GUI();
+		ImGui::PopID();
 	}
 
 	bool isActive() const { return active; }

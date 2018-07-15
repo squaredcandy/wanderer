@@ -6,8 +6,6 @@
 #include "UI.h"
 #include "Dungeon.h"
 
-
-
 namespace Wanderer::Game::Scene
 {
 	void MainMenu();
