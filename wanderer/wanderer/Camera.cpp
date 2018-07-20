@@ -86,7 +86,7 @@ namespace Wanderer::Engine::Camera
 		cam.upVector = glm::normalize(glm::cross(cam.rightVector, cam.forwardVector));
 	}
 
-	CameraData & GetCamera(CameraID key)
+	CameraData& GetCamera(CameraID key)
 	{
 		return cameras[key];
 	}

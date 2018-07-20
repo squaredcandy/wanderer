@@ -240,7 +240,7 @@ void main()
 	vec3 ambient = vec3(0.03) * albedo * ao;
 
 	vec3 color = ambient + (Lo * (1 - totalShadow / lightLength));
-	
+	//vec3 color = ambient + Lo;
 	color -= totalShadow * (0.01 / lightLength);
 
 	// Other one we can use
